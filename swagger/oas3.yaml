@@ -5,3 +5,19 @@ info:
   description: "API per la gestione di segnaposti, cacce al tesoro e quiz."
 servers:
   - url: "http://localhost:3000/api/v1"
+paths:
+  /hello:
+    get:
+      summary: "Endpoint di prova"
+      description: "Restituisce un messaggio di benvenuto."
+      responses:
+        "200":
+          description: "Successo"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Ciao, il server è attivo!"

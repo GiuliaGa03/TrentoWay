@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trento Way</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <h1>Trento Way</h1>
+  <div id="map"></div>
+
+  <!-- Carica prima lo script che contiene la logica della mappa -->
+  <script src="/script.js"></script>
+  
+  <!-- Carica poi Google Maps API che eseguirà la funzione `initMap()` -->
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAora1BYpStRITVidbxMXucmAl0eX0t24c&callback=initMap"></script>
+
+</body>
+</html>

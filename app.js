@@ -32,16 +32,14 @@ app.get("/api/v1/hello", (req, res) => {
   res.json({ message: "Ciao, il server è attivo!" });
 });
 
-app.use(express.static(path.join(__dirname, 'static'))); //express.static è un middleware montato con app.use che serve i file statici 
-                                                        //che si trovano nella cartella static.
+// Serve i file statici dalla cartella "static"
+app.use(express.static(path.join(__dirname, 'static')));
 
-app.get('/', (req, res) => {   //restituisce la pagina index.html nel percorso home /
+// Per ogni altro percorso non gestito dai file statici, restituisci `index.html`
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
 
-app.get('/api/maps-key', (req, res) => {
-  res.json({ key: process.env.GOOGLE_MAPS_API_KEY });
-});
 
 
 

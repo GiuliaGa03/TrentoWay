@@ -5,7 +5,7 @@ const swaggerUi = require("swagger-ui-express");
 const fs = require("fs");
 const yaml = require("yaml");
 const cors = require('cors')
-
+const path = require("path");
 const app = express();
 
 
@@ -28,9 +28,14 @@ app.use(express.urlencoded({ extended: true }));
  */
 app.use(cors())
 
-// Endpoint di prova
-app.get("/api/v1/hello", (req, res) => {
-  res.json({ message: "Ciao, il server è attivo!" });
+
+
+// Serve i file statici dalla cartella "static"
+app.use(express.static(path.join(__dirname, 'static')));
+
+// Per ogni altro percorso non gestito dai file statici, restituisci `index.html`
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
 
 // GET: Ottieni tutti i segnaposti
@@ -99,6 +104,15 @@ app.get('/api/segnaposti/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+
+
+
+// Questo endpoint restituisce la chiave API di Google Maps in un file JavaScript per via della sicurezza (la chiave deve stare in .env e mai su github)
+app.get('/api/maps-config.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send(`window.GOOGLE_MAPS_API_KEY = "${process.env.GOOGLE_MAPS_API_KEY}";`);
 });
 
 

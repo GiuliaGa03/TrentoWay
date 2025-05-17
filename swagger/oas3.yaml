@@ -34,7 +34,18 @@ paths:
                 items:
                   $ref: '#/components/schemas/Segnaposto'
 
-
+  /api/v1/segnaposti/{id}:
+    get:
+      summary: Ottieni un segnaposto specifico
+      responses:
+        '200':
+          description: Segnaposto trovato con successo e restituito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Segnaposto'
+        '404':
+          description: Segnaposto non trovato
 
 
 

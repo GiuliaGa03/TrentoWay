@@ -21,40 +21,69 @@ paths:
               schema:
                 type: string
                 example: 'window.GOOGLE_MAPS_API_KEY = "YOUR_API_KEY";'
-  
-  /api/segnaposti:
+  /api/v1/segnaposti:
     get:
-      summary: Restituisce la lista dei segnaposti
-      description: >
-        Questo endpoint restituisce un array di oggetti segnaposto.  
-        Ogni oggetto contiene informazioni come ID, nome, descrizione e coordinate.
+      summary: Ottieni tutti i segnaposti
       responses:
-        "200":
-          description: Lista dei segnaposti
+        '200':
+          description: Lista di segnaposti
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      example: 1
-                    name:
-                      type: string
-                      example: "Segnaposto 1"
-                    description:
-                      type: string
-                      example: "Descrizione del segnaposto 1"
-                    coordinates:
-                      type: object
-                      properties:
-                        lat:
-                          type: number
-                          format: float
-                          example: 45.123456
-                        lng:
-                          type: number
-                          format: float
-                          example: 9.123456
+                  $ref: '#/components/schemas/Segnaposto'
+
+
+
+
+
+
+components:
+  schemas:
+    Quiz:
+      type: object
+      properties:
+        domanda:
+          type: string
+          example: "Qual è il colore del cielo?"
+        risposte:
+          type: array
+          items:
+            type: string
+          example: ["Blu", "Verde", "Rosso", "Giallo", "Nero"]
+        indiceRispostaGiusta:
+          type: integer
+          example: 0
+
+    Segnaposto:
+      type: object
+      properties:
+        titolo:
+          type: string
+          example: "Duomo di Trento"
+        descrizione:
+          type: string
+          example: "La principale cattedrale di Trento."
+        indirizzo:
+          type: string
+          example: "Piazza Duomo, Trento"
+        quiz:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quiz'
+        indizio:
+          type: string
+          nullable: true
+          example: "Dirigiti alla chiesa più importante di Trento."
+        coordinate:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: float
+              example: 46.066667
+            lng:
+              type: number
+              format: float
+              example: 11.116667

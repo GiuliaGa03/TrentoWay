@@ -1,31 +1,24 @@
 const mongoose = require('mongoose');
 
-const RecensioneSchema = new mongoose.Schema({
-  utenteId: String,
-  testo: String,
-  voto: Number
-});
-
-const QuizSchema = new mongoose.Schema({
-  domanda: String,
-  risposte: [String],
-  indiceRispostaGiusta: Number,
-  punti: Number
+const CoordinateSchema = new mongoose.Schema({
+  lat: { type: Number, required: true },
+  lng: { type: Number, required: true }
 });
 
 const SegnapostoSchema = new mongoose.Schema({
-  nome: { type: String, required: true },
-  indirizzo: String,
-  descrizione: String,
+  titolo: { type: String, required: true },
+  descrizione: { type: String, required: true },
+  indirizzo: { type: String, required: true },
   coordinate: {
-    lat: Number,
-    lng: Number
+    type: CoordinateSchema,
+    required: true
   },
-  punti: Number,
-  indizio: String,
-  quiz: [QuizSchema],
-  recensioni: [RecensioneSchema],
-  numeroVisitatori: { type: Number, default: 0 }
+  quiz: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quiz' // Riferimento al modello Quiz
+  }],
+  indizio: { type: String, default: null },
+  punti: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('Segnaposto', SegnapostoSchema);

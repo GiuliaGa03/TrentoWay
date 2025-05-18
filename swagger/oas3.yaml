@@ -6,18 +6,95 @@ info:
 servers:
   - url: "http://localhost:3000/api/v1"
 paths:
-  /hello:
+  /api/maps-config.js:
     get:
-      summary: "Endpoint di prova"
-      description: "Restituisce un messaggio di benvenuto."
+      summary: Restituisce la chiave API di Google Maps in formato JavaScript
+      description: >
+        Questo endpoint fornisce la chiave API di Google Maps sotto forma di file JavaScript.  
+        La chiave viene caricata come variabile globale `window.GOOGLE_MAPS_API_KEY`.  
+        **Nota:** La chiave API è esposta in chiaro ma è stata limitata a richieste da domini specifici.
       responses:
         "200":
-          description: "Successo"
+          description: File JavaScript contenente la chiave API
+          content:
+            application/javascript:
+              schema:
+                type: string
+                example: 'window.GOOGLE_MAPS_API_KEY = "YOUR_API_KEY";'
+  /api/v1/segnaposti:
+    get:
+      summary: Ottieni tutti i segnaposti
+      responses:
+        '200':
+          description: Lista di segnaposti
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Ciao, il server è attivo!"
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnaposto'
+
+  /api/v1/segnaposti/{id}:
+    get:
+      summary: Ottieni un segnaposto specifico
+      responses:
+        '200':
+          description: Segnaposto trovato con successo e restituito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Segnaposto'
+        '404':
+          description: Segnaposto non trovato
+
+
+
+
+components:
+  schemas:
+    Quiz:
+      type: object
+      properties:
+        domanda:
+          type: string
+          example: "Qual è il colore del cielo?"
+        risposte:
+          type: array
+          items:
+            type: string
+          example: ["Blu", "Verde", "Rosso", "Giallo", "Nero"]
+        indiceRispostaGiusta:
+          type: integer
+          example: 0
+
+    Segnaposto:
+      type: object
+      properties:
+        titolo:
+          type: string
+          example: "Duomo di Trento"
+        descrizione:
+          type: string
+          example: "La principale cattedrale di Trento."
+        indirizzo:
+          type: string
+          example: "Piazza Duomo, Trento"
+        quiz:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quiz'
+        indizio:
+          type: string
+          nullable: true
+          example: "Dirigiti alla chiesa più importante di Trento."
+        coordinate:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: float
+              example: 46.066667
+            lng:
+              type: number
+              format: float
+              example: 11.116667

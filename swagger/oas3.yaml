@@ -81,6 +81,9 @@ components:
         indiceRispostaGiusta:
           type: integer
           example: 0
+        punti:
+          type: integer
+          example: 5
 
     Segnaposto:
       type: object
@@ -98,6 +101,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quiz'
+        punti:
+          type: integer
+          example: 10
         indizio:
           type: string
           nullable: true

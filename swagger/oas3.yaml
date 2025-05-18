@@ -33,6 +33,19 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Segnaposto'
+    post:
+      summary: Crea un nuovo segnaposto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Segnaposto'
+      responses:
+        '201':
+          description: Segnaposto creato con successo
+        '400':
+          description: Errore nei dati inviati
 
   /api/v1/segnaposti/{id}:
     get:
@@ -46,6 +59,8 @@ paths:
                 $ref: '#/components/schemas/Segnaposto'
         '404':
           description: Segnaposto non trovato
+  
+    
 
 
 

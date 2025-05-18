@@ -1,4 +1,6 @@
 const Segnaposto = require('./models/Segnaposto');
+const Quiz = require('./models/Quiz');
+
 const express = require("express");
 
 const swaggerUi = require("swagger-ui-express");
@@ -41,8 +43,19 @@ app.get("/", (req, res) => {
 // GET: Ottieni tutti i segnaposti
 app.get('/api/segnaposti', async (req, res) => {
   try {
-    const segnaposti = await Segnaposto.find();
+    const segnaposti = await Segnaposto.find().populate('quiz');
     res.json(segnaposti);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET: Ottieni un singolo segnaposto per ID
+app.get('/api/segnaposti/:id', async (req, res) => {
+  try {
+    const segnaposto = await Segnaposto.findById(req.params.id).populate('quiz');
+    if (!segnaposto) return res.status(404).json({ message: 'Segnaposto non trovato' });
+    res.json(segnaposto);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -51,9 +64,9 @@ app.get('/api/segnaposti', async (req, res) => {
 // POST: Aggiungi un nuovo segnaposto
 app.post('/api/segnaposti', async (req, res) => {
   try {
-    const nuovoSegnaposto = new Segnaposto(req.body);
-    const salvato = await nuovoSegnaposto.save();
-    res.status(201).json(salvato);
+    const nuovo = new Segnaposto(req.body); // quiz deve essere un array di ObjectId
+    const creato = await nuovo.save();
+    res.status(201).json(creato);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -65,11 +78,9 @@ app.put('/api/segnaposti/:id', async (req, res) => {
     const aggiornato = await Segnaposto.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true } // restituisce il documento aggiornato
+      { new: true }
     );
-    if (!aggiornato) {
-      return res.status(404).json({ message: 'Segnaposto non trovato' });
-    }
+    if (!aggiornato) return res.status(404).json({ message: 'Segnaposto non trovato' });
     res.json(aggiornato);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -80,29 +91,80 @@ app.put('/api/segnaposti/:id', async (req, res) => {
 app.delete('/api/segnaposti/:id', async (req, res) => {
   try {
     const eliminato = await Segnaposto.findByIdAndDelete(req.params.id);
-    if (!eliminato) {
-      return res.status(404).json({ message: 'Segnaposto non trovato' });
-    }
+    if (!eliminato) return res.status(404).json({ message: 'Segnaposto non trovato' });
     res.json({ message: 'Segnaposto eliminato con successo' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET: Ottieni un singolo segnaposto per ID
-app.get('/api/segnaposti/:id', async (req, res) => {
+// GET: Ottieni tutti i quiz
+app.get('/api/quiz', async (req, res) => {
   try {
-    const segnaposto = await Segnaposto.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { numeroVisitatori: 1 } }, // test incremento automatico
-      { new: true }
-    );
-    if (!segnaposto) {
-      return res.status(404).json({ message: 'Segnaposto non trovato' });
-    }
-    res.json(segnaposto);
+    const quiz = await Quiz.find();
+    res.json(quiz);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// GET: Ottieni un singolo quiz per ID
+app.get('/api/quiz/:id', async (req, res) => {
+  try {
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ message: 'Quiz non trovato' });
+    res.json(quiz);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST: Aggiungi un nuovo quiz
+app.post('/api/quiz', async (req, res) => {
+  try {
+    const nuovoQuiz = new Quiz(req.body);
+    const salvato = await nuovoQuiz.save();
+    res.status(201).json(salvato);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// PUT: Aggiorna un quiz esistente
+app.put('/api/quiz/:id', async (req, res) => {
+  try {
+    const aggiornato = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!aggiornato) return res.status(404).json({ message: 'Quiz non trovato' });
+    res.json(aggiornato);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE: Elimina un quiz
+app.delete('/api/quiz/:id', async (req, res) => {
+  try {
+    const eliminato = await Quiz.findByIdAndDelete(req.params.id);
+    if (!eliminato) return res.status(404).json({ message: 'Quiz non trovato' });
+    res.json({ message: 'Quiz eliminato con successo' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST: Aggiungere quiz a un segnaposto esistente
+app.post('/api/segnaposti/:id/quiz', async (req, res) => {
+  try {
+    const nuovoQuiz = await Quiz.create(req.body);
+    const segnaposto = await Segnaposto.findById(req.params.id);
+    if (!segnaposto) return res.status(404).json({ message: 'Segnaposto non trovato' });
+
+    segnaposto.quiz.push(nuovoQuiz._id);
+    await segnaposto.save();
+
+    res.status(201).json({ message: 'Quiz aggiunto e associato al segnaposto', quiz: nuovoQuiz });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

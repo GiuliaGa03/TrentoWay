@@ -7,6 +7,7 @@
     "accepts": "^2.0.0",
     "argparse": "^1.0.10",
     "balanced-match": "^1.0.2",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "brace-expansion": "^1.1.11",
     "bytes": "^3.1.2",

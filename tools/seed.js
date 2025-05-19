@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 
 const Segnaposto = require('../models/Segnaposto');
 const Quiz = require('../models/Quiz');

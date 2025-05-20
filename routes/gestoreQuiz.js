@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
   try {
     const nuovoQuiz = new Quiz(req.body);
     const salvato = await nuovoQuiz.save();
-    res.status(201).json({ message: 'Quiz creato con successo', quiz: salvato });
+    res.status(201).json({ message: 'Quiz creato con successo'});
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -39,7 +39,7 @@ router.put('/:id', async (req, res) => {
   try {
     const aggiornato = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!aggiornato) return res.status(404).json({ message: 'Quiz non trovato' });
-    res.status(200).json({ message: 'Quiz aggiornato con successo', quiz: aggiornato });
+    res.status(200).json({ message: 'Quiz aggiornato con successo'});
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

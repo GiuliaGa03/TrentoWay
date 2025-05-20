@@ -1,80 +1,475 @@
 FORMAT: 1A
-HOST: https://polls.apiblueprint.org/
+HOST: http://localhost:3000
 
-# Giulia Garonzi
+# TrentoWay
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+**Idea del Progetto**: TrentoWay è un’applicazione web interattiva che valorizza il patrimonio culturale della città di Trento tramite mappe, quiz e cacce al tesoro legate a luoghi reali.
+Gli utenti guadagnano punti esplorando la città, in questo modo si incentiva il movimento e l’apprendimento attivo. 
+Il sistema include classifiche, recensioni e funzionalità amministrative per la gestione dei contenuti, supportando ruoli differenziati per utenti e per amministratori comunali.
 
-## Questions Collection [/questions]
 
-### List All Questions [GET]
+TrentoWay è composta dalle seguenti API:
+
+
+## Restituisce la chiave API di Google Maps in formato JavaScript [/api/maps-config.js]
+### GET Mappa [GET /]
+
+Questo endpoint fornisce la chiave API di Google Maps sotto forma di file JavaScript.  
+La chiave viene caricata come variabile globale `window.GOOGLE_MAPS_API_KEY`.  
+**Nota:** La chiave API è esposta in chiaro ma è stata limitata a richieste da domini specifici.
 
 + Response 200 (application/json)
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+        + Description: File JavaScript contenente la chiave API
+
+## Segnaposti generico [/api/v1/segnaposti]
+
+### Lista segnaposti [GET /]
+
+Restituisce la lista di tutti i segnaposto salvati nel server.
+
++ Response 200 (application/json)
+
+            [
+                {
+                [
+                    {   
+                        "nome": "nome_segnaposto_1",
+                        "indirizzo": "address_segnaposto_1",
+                        "descrizione": "...",
+                        "coordinate": "[1,1]",
+                        "punti": 5,
+                    },
                     {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
+                        "nome": "nome_segnaposto_2",
+                        "indirizzo": "address_segnaposto_2",
+                        "descrizione": "...",
+                        "coordinate": "[2,2]",
+                        "punti": 5,
                     }
-                ]
-            }
-        ]
+                ],
+                "Description": "Lista di segnaposti restituita completamente"
+                }
+            ]    
+       
++ Response 500 (application/json)
 
-### Create a New Question [POST]
+            [
+                {
+                "Description": "Errore interno del server"
+                }
+            ]
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+        
+### Crea Segnaposto [POST /]
+
+Crea un nuovo segnaposto.
 
 + Request (application/json)
-
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
-
+    
+            {
+                "nome": "nomeX",
+                "indirizzo": "indirizzoX",
+                "descrizione": "descrizioneX",
+                "coordinate": [0,0],
+                "punti": 0,
+                "indizio": "indizioX",
+                "quiz": "quizX",
+            }
+            
 + Response 201 (application/json)
 
-    + Headers
+            {
+                {   
+                    "nome": "nomeX",
+                    "indirizzo": "indirizzoX",
+                    "descrizione": "descrizioneX",
+                    "coordinate": [0,0],
+                    "punti": 0,
+                    "indizio": "indizioX",
+                    "quiz": "quizX",
+                    "recensioni": null
+                    "numeroVisistatori": 0
+                },
+                "Description": "Segnaposto creato con successo"
+            }
+            
++ Response 400 (application/json)
 
-            Location: /questions/2
+   
+            {
+                "data": {   
+                    "nome": null,
+                    "indirizzo": null,
+                    "descrizione": null,
+                    "coordinate": [null, null],
+                    "punti": null,
+                    "indizio": null,
+                    "quiz": null,
+                    "recensioni": null
+                    "numeroVisistatori": null
+                },
+                "Description": "Dati non validi"
+            }
+
+
+## Segnaposto specifico per ID [/api/v1/segnaposti/{id}]
+
+### Lettura Segnaposto [GET /123a45678b9c0d123efg4hij]
+
++ Response 200 (application/json)
+
+            {
+                {   
+                    "nome": "nome_segnaposto_3",
+                    "indirizzo": "address_segnaposto_3",
+                    "descrizione": "...",
+                    "coordinate": "[3,3]",
+                    "punti": 5,
+                    "indizio": "indizio3",
+                    "quiz": "quiz3.1",
+                    "recensioni": "[]",
+                    "numeroVisistatori": int,
+                },
+                "Description": "Segnaposto trovato con successo e restituito"
+            }
+
++ Response 404 (application/json)
+
+            {
+                {   
+                   "segnaposto": null,
+                },
+                "Description": "Segnaposto non trovato"
+            }
+
++ Response 500 (application/json)
+
+            [
+                {
+                "Description": "Errore interno del server"
+                }
+            ]
+        
+### Aggiorna segnaposto specifico [PUT /123a45678b9c0d123efg4hij]
++ Request (application/json)
 
     + Body
 
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
+            "nome": "new_nome",
+            "indirizzo": "new_address",
+            "descrizione": "new_descrip",
+            "coordinate": "[new,new]",
+            "punti": 5,
+            "indizio": "new_indizio",
+            "quiz": new_quiz,
+            "recensioni": "[new]",
+            "numeroVisistatori": new_int,
             }
+
++ Response 200 (application/json)
+
+            {
+                {   
+                    "nome": "new_nome",
+                    "indirizzo": "new_address",
+                    "descrizione": "new_descrip",
+                    "coordinate": "[new,new]",
+                    "punti": 5,
+                    "indizio": "new_indizio",
+                    "quiz": new_quiz,
+                    "recensioni": "[new]",
+                    "numeroVisistatori": new_int,
+                },
+                "Description": "Segnaposto aggiornato con successo"
+            }
+        
++ Response 400 (application/json)
+
+            {
+                {   
+                    "nome": null,
+                    "indirizzo": null,
+                    "descrizione": null,
+                    "coordinate": [null, null],
+                    "punti": null,
+                    "indizio": null,
+                    "quiz": null,
+                    "recensioni": null
+                    "numeroVisistatori": null
+                },
+                "Description": "Dati non validi"
+            }
+        
++ Response 404 (application/json)
+
+            {
+                {   
+                   "segnaposto": null,
+                },
+                "Description": "Segnaposto non trovato"
+            }
+        
+### Elimina Segnaposto [DELETE /123a45678b9c0d123efg4hij]
+
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                {
+                    "nome": "nome_segnaposto_3",
+                    "indirizzo": "address_segnaposto_3",
+                    "descrizione": "...",
+                    "coordinate": "[3,3]",
+                    "punti": 5,
+                    "indizio": "indizio3",
+                    "quiz": "quiz3.1",
+                    "recensioni": "[]",
+                    "numeroVisistatori": int,
+                },    
+                "Description": "Segnaposto eliminato con successo"
+            }
+
++ Response 404 (application/json)
+
+            {
+                {   
+                   "segnaposto": null,
+                },
+                "Description": "Segnaposto non trovato"
+            }
+        
++ Response 500 (application/json)
+
+            [
+                {
+                "Description": "Errore del server"
+                }
+            ]
+
+## Aggiungi quiz esistente a un segnaposto [/api/v1/segnaposti/{id}/quiz]
+### Aggiungi Quiz al Segnaposto [POST /123a45678b9c0d123efg4hij/quiz_id]
+
++ Request (application/json)
+
+            {
+                "quiz": quiz
+            }
++ Response 200 (application/json)
+
+            {
+                {   
+                    "nome": "nome",
+                    "indirizzo": "indirizzo",
+                    "descrizione": "descrizione",
+                    "coordinate": [0,0],
+                    "punti": 0,
+                    "indizio": "indizio",
+                    "quiz": "New_quizX",
+                    "recensioni": ["...", "..."],
+                    "numeroVisistatori": 0
+                },
+                "Description": "Quiz aggiunto con successo al segnaposto"
+            }
+
++ Response 400 (application/json)
+
+            {
+                {   
+                    "nome": "nome",
+                    "indirizzo": "indirizzo",
+                    "descrizione": "descrizione",
+                    "coordinate": [0,0],
+                    "punti": 0,
+                    "indizio": "indizio",
+                    "quiz": null,
+                    "recensioni": ["...", "..."],
+                    "numeroVisistatori": 0
+                },
+                "Description": "Dati non validi"
+            }
+        
++ Response 404 (application/json)
+
+            {
+                {   
+                   "segnaposto": null,
+                },
+                "Description": "Segnaposto o quiz non trovato"
+            }
+        
+
+## Quiz generico [/api/v1/quiz]
+### Lista quiz [GET /]
++ Response 200 (application/json)
+
+            [
+                {
+                [
+                    {   
+                        "domanda": "domanda_1",
+                        "risposte": ["rispostaSchema1_1", "rispostaSchema1_2"],
+                        "indiceRispostaGiusta": int,
+                        "punti": 2,
+                    },
+                    {
+                        "domanda": "domanda_2",
+                        "risposte": [rispostaSchema2_1, rispostaSchema2_2],
+                        "indiceRispostaGiusta": int,
+                        "punti": 2,
+                    }
+                ],
+                "Description": "Lista di quiz restituita completamente"
+                }
+            ]
+        
++ Response 500 (application/json)
+
+            [
+                {
+                "Description": "Errore interno del server"
+                }
+            ]
+
+### Crea Quiz [POST /]
+
++ Request (application/json)
+
+    + Body
+
+            {
+            "domanda": "domanda",
+            "risposte": ["rispostaSchema1_1", "rispostaSchema1_2"],
+            "indiceRispostaGiusta": int,
+            "punti": 2
+            }
+
++ Response 201 (application/json)
+
+            {
+                {   
+                    "domanda": "domanda",
+                    "risposte": ["rispostaSchema1_1", "rispostaSchema1_2"],
+                    "indiceRispostaGiusta": int,
+                    "punti": 2
+                },
+                "Description": "Quiz creato con successo"
+            }
+        
++ Response 400 (application/json)
+
+            {
+                {   
+                    "quiz": null,
+                },
+                "Description": "Dati non validi"
+            }
+
+## Quiz specifico per ID [/api/v1/quiz/{id}]
+### Lettura Quiz [GET /quiz_id]
++ Response 200 (application/json)
+
+            {
+                {   
+                    "domanda": "domandaX",
+                    "risposte": ["rispostaSchemaX_1", "rispostaSchemaX_2"],
+                    "indiceRispostaGiusta": int,
+                    "punti": 2
+                },
+                "Description": "Quiz trovato con successo e restituito"
+            }
+
++ Response 404 (application/json)
+
+            {
+                {   
+                   "Quiz": null,
+                },
+                "Description": "Quiz non trovato"
+            }
+
++ Response 500 (application/json)
+
+            {
+                "Description": "Errore del server"
+            }
+        
+### Aggiorna Quiz Specifico [PUT /quiz_id]
++ Request (application/json)
+
+    + Body
+
+            {
+            "domanda": "new_domanda",
+            "risposte": ["new_rispostaSchema_1", "new_rispostaSchema_2"],
+            "indiceRispostaGiusta": "new_indiceRispostaGiusta",
+            "punti": "new_punti"
+            }
+
++ Response 200 (application/json)
+
+            {
+                {   
+                    "domanda": "new_domanda",
+                    "risposte": ["new_rispostaSchema_1", "new_rispostaSchema_2"],
+                    "indiceRispostaGiusta": "new_indiceRispostaGiusta",
+                    "punti": "new_punti"
+                },
+                "Description": "Quiz aggiornato con successo"
+            }
+        
++ Response 400 (application/json)
+
+            {
+                {   
+                    
+                    "domanda": null,
+                    "risposte": null,
+                    "indiceRispostaGiusta": null,
+                    "punti": null
+                },
+                "Description": "Dati non validi"
+            }
+
++ Response 404 (application/json)
+
+            {
+                {   
+                   "Quiz": null
+                },
+                "Description": "Quiz non trovato"
+            }
+
+### ELimina Quiz [DELETE /quiz_id]
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                {
+                    "domanda": "domanda5",
+                    "risposte": ["rispostaSchema5_1", "rispostaSchema5_2"],
+                    "indiceRispostaGiusta": int,
+                    "punti": 2
+                },    
+                "Description": "Quiz eliminato con successo"
+            }
+
++ Response 404 (application/json)
+
+            {
+                {   
+                   "Quiz": null
+                },
+                "Description": "Quiz non trovato"
+            }
+
++ Response 500 (application/json)
+
+            [
+                {
+                "Description": "Errore del server"
+                }
+            ]

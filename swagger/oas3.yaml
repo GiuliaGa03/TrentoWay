@@ -21,6 +21,9 @@ paths:
               schema:
                 type: string
                 example: 'window.GOOGLE_MAPS_API_KEY = "YOUR_API_KEY";'
+
+
+
   /api/v1/segnaposti:
     get:
       summary: Ottieni tutti i segnaposti
@@ -33,10 +36,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Segnaposto'
+        '500':
+          description: Errore interno del server
+    post:
+      summary: Crea un nuovo segnaposto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Segnaposto'
+      responses:
+        '201':
+          description: Segnaposto creato con successo
+        '400':
+          description: Dati non validi
+
+
 
   /api/v1/segnaposti/{id}:
     get:
-      summary: Ottieni un segnaposto specifico
+      summary: Ottieni un segnaposto specifico per ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del segnaposto da recuperare
+          schema:
+            type: string
       responses:
         '200':
           description: Segnaposto trovato con successo e restituito
@@ -46,7 +73,175 @@ paths:
                 $ref: '#/components/schemas/Segnaposto'
         '404':
           description: Segnaposto non trovato
+        '500':
+          description: Errore del server
+    put:
+      summary: Aggiorna un segnaposto
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Segnaposto'
+      responses:
+        '200':
+           description: Segnaposto aggiornato con successo
+        '400':
+          description: Dati non validi
+        '404':
+          description: Segnaposto non trovato
+    delete:
+      summary: Elimina segnaposto
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description : Segnaposto eliminato con successo
+        '404':
+          description: segnaposto non trovato
+        '500':
+          description: errore del server'
+    
 
+  /api/v1/segnaposti/{id}/quiz:
+    post: 
+      summary: aggiungi un quiz gia esistente ad un segnaposto 
+      description: >
+        Questo endpoint permette di aggiungere ad un segnaposto gia esistente (puo anche non contenere quiz)
+        un quiz anchesso gia esistente.
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: >
+          All'interno del body della richiesta deve essere presente l'id del quiz da aggiungere al segnaposto.
+        required: true 
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                quizId:
+                  type: string
+                  example: "12345"
+              required:
+                - quizId
+      responses:
+        '200':
+          description: Quiz aggiunto con successo al segnaposto
+        '400':
+          description: Dati non validi
+        '404':
+          description: Segnaposto o quiz non trovato
+
+
+
+
+
+
+
+
+  /api/v1/quiz:
+    get:
+      summary: Ottieni tutti i quiz
+      responses:
+        '200':
+          description: Lista di quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quiz'
+        '500':
+          description: Errore interno del server
+
+    post:
+      summary: Crea un nuovo quiz
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quiz'
+      responses:
+        '201':
+          description: Quiz creato con successo
+        '400':
+          description: Dati non validi
+  
+  /api/v1/quiz/{id}:
+    get:
+      summary: Ottieni un quiz specifico per ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del quiz da recuperare
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quiz trovato con successo 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+        '404':
+          description: Quiz non trovato
+        '500':
+          description: Errore del server
+    
+    put:
+      summary: Aggiorna un quiz
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quiz'
+      responses:
+        '200':
+           description: Quiz aggiornato con successo
+        '400':
+          description: Dati non validi
+        '404':
+          description: Quiz non trovato
+    
+    delete:
+      summary: Elimina quiz
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description : Quiz eliminato con successo
+        '404':
+          description: quiz non trovato
+        '500':
+          description: errore del server
 
 
 
@@ -66,6 +261,9 @@ components:
         indiceRispostaGiusta:
           type: integer
           example: 0
+        punti:
+          type: integer
+          example: 5
 
     Segnaposto:
       type: object
@@ -83,6 +281,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quiz'
+        punti:
+          type: integer
+          example: 10
         indizio:
           type: string
           nullable: true

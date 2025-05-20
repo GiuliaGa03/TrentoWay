@@ -149,6 +149,102 @@ paths:
 
 
 
+
+
+
+
+
+  /api/v1/quiz:
+    get:
+      summary: Ottieni tutti i quiz
+      responses:
+        '200':
+          description: Lista di quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quiz'
+        '500':
+          description: Errore interno del server
+
+    post:
+      summary: Crea un nuovo quiz
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quiz'
+      responses:
+        '201':
+          description: Quiz creato con successo
+        '400':
+          description: Dati non validi
+  
+  /api/v1/quiz/{id}:
+    get:
+      summary: Ottieni un quiz specifico per ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del quiz da recuperare
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quiz trovato con successo 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+        '404':
+          description: Quiz non trovato
+        '500':
+          description: Errore del server
+    
+    put:
+      summary: Aggiorna un quiz
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quiz'
+      responses:
+        '200':
+           description: Quiz aggiornato con successo
+        '400':
+          description: Dati non validi
+        '404':
+          description: Quiz non trovato
+    
+    delete:
+      summary: Elimina quiz
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description : Quiz eliminato con successo
+        '404':
+          description: quiz non trovato
+        '500':
+          description: errore del server
+
+
+
 components:
   schemas:
     Quiz:

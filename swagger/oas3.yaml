@@ -247,23 +247,41 @@ paths:
 
 components:
   schemas:
+
+
+    Risposta:
+      type: object
+      required:
+        - testo
+      properties:
+        testo:
+          type: string
+          example: "Nella prima metà del 1200"
+        corretta:
+          type: boolean
+          default: false
+          example: true
+      
+
     Quiz:
       type: object
+      required:
+        - domanda
+        - risposte
       properties:
         domanda:
           type: string
-          example: "Qual è il colore del cielo?"
+          example: "Quando è stato costruito il castello del Buonconsiglio?"
         risposte:
           type: array
           items:
-            type: string
-          example: ["Blu", "Verde", "Rosso", "Giallo", "Nero"]
-        indiceRispostaGiusta:
-          type: integer
-          example: 0
+            $ref: '#/components/schemas/Risposta'
         punti:
           type: integer
+          minimum: 0
           example: 5
+    
+
 
     Segnaposto:
       type: object
@@ -279,6 +297,7 @@ components:
           example: "Piazza Duomo, Trento"
         quiz:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/Quiz'
         punti:

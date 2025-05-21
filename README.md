@@ -10,7 +10,7 @@ cd trentoway
 ```bash
 npm -v
 ```
-if not
+  if not
 ```bash
 npm install
 npm start

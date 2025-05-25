@@ -4,10 +4,29 @@ info:
   version: "1.0.0"
   description: "API per la gestione di segnaposti, cacce al tesoro e quiz."
 servers:
-  - url: "http://localhost:3000/api/v1"
+  - url: "http://localhost:3000"
+
+
+tags:
+  - name: "Segnaposti"
+    description: "Gestione dei segnaposti"
+  - name: "Quiz"
+    description: "Gestione dei quiz"
+  - name: "Caccia al Tesoro"
+    description: "Gestione delle cacce al tesoro"
+  - name: "Google Maps"
+    description: "Gestione della chiave API di Google Maps" 
+
+
+
+
+
+
 paths:
   /api/maps-config.js:
     get:
+      tags:
+        - "Google Maps"
       summary: Restituisce la chiave API di Google Maps in formato JavaScript
       description: >
         Questo endpoint fornisce la chiave API di Google Maps sotto forma di file JavaScript.  
@@ -26,6 +45,8 @@ paths:
 
   /api/v1/segnaposti:
     get:
+      tags:
+        - "Segnaposti"
       summary: Ottieni tutti i segnaposti
       responses:
         '200':
@@ -39,6 +60,8 @@ paths:
         '500':
           description: Errore interno del server
     post:
+      tags:
+        - "Segnaposti"
       summary: Crea un nuovo segnaposto
       requestBody:
         required: true
@@ -56,6 +79,8 @@ paths:
 
   /api/v1/segnaposti/{id}:
     get:
+      tags:
+        - "Segnaposti"
       summary: Ottieni un segnaposto specifico per ID
       parameters:
         - name: id
@@ -76,6 +101,8 @@ paths:
         '500':
           description: Errore del server
     put:
+      tags:
+        - "Segnaposti"
       summary: Aggiorna un segnaposto
       parameters: 
         - in: path
@@ -97,6 +124,8 @@ paths:
         '404':
           description: Segnaposto non trovato
     delete:
+      tags:
+        - "Segnaposti"
       summary: Elimina segnaposto
       parameters: 
         - in: path
@@ -113,37 +142,52 @@ paths:
           description: errore del server'
     
 
-  /api/v1/segnaposti/{id}/quiz:
+  /api/v1/segnaposti/{id}/quiz/{quizId}:
     post: 
-      summary: aggiungi un quiz gia esistente ad un segnaposto 
-      description: >
-        Questo endpoint permette di aggiungere ad un segnaposto gia esistente (puo anche non contenere quiz)
-        un quiz anchesso gia esistente.
+      tags:
+        - Segnaposti
+      summary: Aggiungi un quiz a un segnaposto
+      description: Associa un quiz esistente a un segnaposto esistente.
       parameters: 
         - in: path
           name: id
           required: true
           schema:
             type: string
-      requestBody:
-        description: >
-          All'interno del body della richiesta deve essere presente l'id del quiz da aggiungere al segnaposto.
-        required: true 
-        content: 
-          application/json:
-            schema:
-              type: object
-              properties:
-                quizId:
-                  type: string
-                  example: "12345"
-              required:
-                - quizId
+          description: ID del segnaposto
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+          description: ID del quiz da aggiungere
       responses:
         '200':
           description: Quiz aggiunto con successo al segnaposto
-        '400':
-          description: Dati non validi
+        '404':
+          description: Segnaposto o quiz non trovato
+
+    delete:
+      tags:
+        - Segnaposti
+      summary: Rimuovi un quiz da un segnaposto
+      description: Rimuove l'associazione tra un quiz e un segnaposto esistente.
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID del segnaposto
+        - in: path
+          name: quizId
+          required: true
+          schema:
+            type: string
+          description: ID del quiz da rimuovere
+      responses:
+        '200':
+          description: Quiz rimosso con successo dal segnaposto
         '404':
           description: Segnaposto o quiz non trovato
 
@@ -152,10 +196,10 @@ paths:
 
 
 
-
-
   /api/v1/quiz:
     get:
+      tags:
+        - "Quiz"
       summary: Ottieni tutti i quiz
       responses:
         '200':
@@ -170,6 +214,8 @@ paths:
           description: Errore interno del server
 
     post:
+      tags:
+        - "Quiz"
       summary: Crea un nuovo quiz
       requestBody:
         required: true
@@ -185,6 +231,8 @@ paths:
   
   /api/v1/quiz/{id}:
     get:
+      tags:
+        - "Quiz"
       summary: Ottieni un quiz specifico per ID
       parameters:
         - name: id
@@ -206,7 +254,9 @@ paths:
           description: Errore del server
     
     put:
-      summary: Aggiorna un quiz
+      tags:
+        - "Quiz"  
+      summary: Aggiorna un quiz specifico
       parameters: 
         - in: path
           name: id
@@ -228,7 +278,9 @@ paths:
           description: Quiz non trovato
     
     delete:
-      summary: Elimina quiz
+      tags:
+        - "Quiz"
+      summary: Elimina quiz specifico
       parameters: 
         - in: path
           name: id
@@ -243,11 +295,134 @@ paths:
         '500':
           description: errore del server
 
+  /api/v1/cacciaAlTesoro:
+    get:
+      tags:
+        - "Caccia al Tesoro"
+      summary: Ottieni la lista di tutte le cacce al tesoro
+      responses:
+        '200':
+          description: Lista di cacce al tesoro
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CacciaAlTesoro'
+    post:
+      tags:
+        - "Caccia al Tesoro"  
+      summary: Crea una nuova caccia al tesoro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacciaAlTesoro'
+      responses:
+        '201':
+          description: Caccia al tesoro creata con successo
+        '400':
+          description: Dati non validi
+
+    
+      
+  /api/v1/cacciaAlTesoro/{id}:
+    get:
+      tags:
+        - "Caccia al Tesoro"
+      summary: Ottieni una caccia al tesoro specifica per ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID della caccia al tesoro da recuperare
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Caccia al tesoro trovata con successo 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacciaAlTesoro'
+        '404':
+          description: Caccia al tesoro non trovata
+        '500':
+          description: Errore del server
+          
+    delete:
+      tags:
+        - "Caccia al Tesoro"
+      summary: Elimina una caccia al tesoro
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description : Caccia al tesoro eliminata con successo
+        '404':
+          description: Caccia al tesoro non trovata
+        '500':
+          description: Errore del server       
+    
+  /api/v1/cacciaAlTesoro/{id}/segnaposti/{segnapostoId}:
+    post:
+      tags:
+        - Caccia al Tesoro
+      summary: Aggiungi un segnaposto a una caccia al tesoro
+      description: Associa un segnaposto esistente a una caccia al tesoro esistente.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID della caccia al tesoro
+        - in: path
+          name: segnapostoId
+          required: true
+          schema:
+            type: string
+          description: ID del segnaposto da aggiungere
+      responses:
+        '200':
+          description: Segnaposto aggiunto con successo
+        '404':
+          description: Caccia al tesoro o segnaposto non trovati
+
+    delete:
+      tags:
+        - Caccia al Tesoro
+      summary: Rimuovi un segnaposto da una caccia al tesoro
+      description: Rimuove un'associazione tra una caccia al tesoro e un segnaposto.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID della caccia al tesoro
+        - in: path
+          name: segnapostoId
+          required: true
+          schema:
+            type: string
+          description: ID del segnaposto da rimuovere
+      responses:
+        '200':
+          description: Segnaposto rimosso con successo dalla caccia al tesoro
+        '404':
+          description: Caccia al tesoro o segnaposto non trovati
+      
+
 
 
 components:
   schemas:
-
 
     Risposta:
       type: object
@@ -318,3 +493,17 @@ components:
               type: number
               format: float
               example: 11.116667
+
+    CacciaAlTesoro:
+      type: object
+      properties: 
+        titolo:
+          type: string
+          example: "Caccia lungo l'Adige"
+        descrizione:
+          type: string
+          example: "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andra a a toccare i principali punti di interesse "
+        segnaposti:
+          type: array
+          items:
+            $ref: '#/components/schemas/Segnaposto'

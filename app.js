@@ -11,6 +11,7 @@ const path = require("path");
 const app = express();
 const gestoreSegnaposti= require("./routes/gestoreSegnaposto.js");
 const gestoreQuiz = require("./routes/gestoreQuiz.js");
+const gestoreCacciaAlTesoro = require("./routes/gestoreCacciaAlTesoro.js");
 
 
 // Carica il file OpenAPI

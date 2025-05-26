@@ -11,6 +11,7 @@ const path = require("path");
 const app = express();
 const gestoreSegnaposti= require("./routes/gestoreSegnaposto.js");
 const gestoreQuiz = require("./routes/gestoreQuiz.js");
+const gestoreCacciaAlTesoro = require("./routes/gestoreCacciaAlTesoro.js");
 
 
 // Carica il file OpenAPI
@@ -43,6 +44,9 @@ app.use('/api/v1/segnaposti', gestoreSegnaposti);
 
 //tutte le route per quiz vengono gestite da gestoreQuiz.js
 app.use('/api/v1/quiz', gestoreQuiz);
+
+//tutte le route per la caccia al tesoro vengono gestite da gestoreCacciaAlTesoro.js
+app.use('/api/v1/cacciaAlTesoro', gestoreCacciaAlTesoro);
 
 
 // Questo endpoint restituisce la chiave API di Google Maps in un file JavaScript per via della sicurezza (la chiave deve stare in .env e mai su github)

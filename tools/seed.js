@@ -4,6 +4,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const Segnaposto = require('../models/Segnaposto');
 const Quiz = require('../models/Quiz');
+const CacciaAlTesoro = require('../models/CacciaAlTesoro');
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
@@ -11,6 +12,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
     await Segnaposto.deleteMany();
     await Quiz.deleteMany();
+    await CacciaAlTesoro.deleteMany();
 
     console.log('Creazione quiz...');
 
@@ -49,7 +51,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
     console.log('Creazione segnaposti...');
 
-    await Segnaposto.create([
+    const segnapostiCreati = await Segnaposto.create([
       {
         nome: "Duomo di Trento",
         indirizzo: "Piazza Duomo, Trento",
@@ -78,6 +80,17 @@ mongoose.connect(process.env.MONGODB_URI)
         numeroVisitatori: 0
       }
     ]);
+
+    console.log('Creazione caccia al tesoro...');
+
+  await CacciaAlTesoro.create({
+    titolo: "Tesoro di Trento",
+    descrizione: "Un'avventura tra i luoghi più iconici di Trento.",
+    listaSegnaposti: segnapostiCreati.map((sp, index) => ({
+      segnaposto: sp._id,
+      ordine: index + 1 // Ordine crescente da 1 in poi
+    }))
+  });
 
     console.log('Dati inseriti con successo!');
     mongoose.disconnect();

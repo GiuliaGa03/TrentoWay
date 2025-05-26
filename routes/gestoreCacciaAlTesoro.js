@@ -88,10 +88,11 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST: Aggiunge un segnaposto alla caccia al tesoro
+// POST: Aggiunge un segnaposto alla caccia al tesoro con ordine
 router.post('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
   try {
     const { cacciaId, segnapostoId } = req.params;
+    const { ordine } = req.body; // ordine passato nel body
 
     const caccia = await CacciaAlTesoro.findById(cacciaId);
     if (!caccia) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
@@ -99,16 +100,25 @@ router.post('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
     const segnaposto = await Segnaposto.findById(segnapostoId);
     if (!segnaposto) return res.status(404).json({ message: 'Segnaposto non trovato' });
 
-    if (!caccia.listaSegnaposti.includes(segnapostoId)) {
-      caccia.listaSegnaposti.push(segnapostoId);
+    const giaPresente = caccia.listaSegnaposti.some(entry =>
+      entry.segnaposto.toString() === segnapostoId
+    );
+
+    if (!giaPresente) {
+      caccia.listaSegnaposti.push({
+        segnaposto: segnapostoId,
+        ordine: ordine ?? caccia.listaSegnaposti.length + 1
+      });
+
       await caccia.save();
     }
 
-    res.status(200).json({ message: 'Segnaposto aggiunto alla caccia al tesoro' });
+    res.status(200).json({ message: 'Segnaposto aggiunto alla caccia al tesoro con ordine' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
+
 
 // DELETE: Rimuove un segnaposto dalla caccia al tesoro
 router.delete('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
@@ -118,11 +128,18 @@ router.delete('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
     const caccia = await CacciaAlTesoro.findById(cacciaId);
     if (!caccia) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
 
-    if (!caccia.listaSegnaposti.includes(segnapostoId)) {
+    const presente = caccia.listaSegnaposti.some(entry =>
+      entry.segnaposto.toString() === segnapostoId
+    );
+
+    if (!presente) {
       return res.status(400).json({ message: 'Il segnaposto non è associato a questa caccia' });
     }
 
-    caccia.listaSegnaposti = caccia.listaSegnaposti.filter(id => id.toString() !== segnapostoId);
+    caccia.listaSegnaposti = caccia.listaSegnaposti.filter(entry =>
+      entry.segnaposto.toString() !== segnapostoId
+    );
+
     await caccia.save();
 
     res.status(200).json({ message: 'Segnaposto rimosso dalla caccia al tesoro' });
@@ -130,5 +147,6 @@ router.delete('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
 
 module.exports = router;

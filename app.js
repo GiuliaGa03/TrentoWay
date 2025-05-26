@@ -46,7 +46,7 @@ app.use('/api/v1/segnaposti', gestoreSegnaposti);
 app.use('/api/v1/quiz', gestoreQuiz);
 
 //tutte le route per la caccia al tesoro vengono gestite da gestoreCacciaAlTesoro.js
-app.use('/api/v1/caccia', gestoreCacciaAlTesoro);
+app.use('/api/v1/cacciaAlTesoro', gestoreCacciaAlTesoro);
 
 
 // Questo endpoint restituisce la chiave API di Google Maps in un file JavaScript per via della sicurezza (la chiave deve stare in .env e mai su github)

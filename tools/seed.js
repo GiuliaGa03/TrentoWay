@@ -83,11 +83,14 @@ mongoose.connect(process.env.MONGODB_URI)
 
     console.log('Creazione caccia al tesoro...');
 
-    await CacciaAlTesoro.create({
-      titolo: "Tesoro di Trento",
-      descrizione: "Un'avventura tra i luoghi più iconici di Trento.",
-      listaSegnaposti: segnapostiCreati.map(sp => sp._id)
-    });
+  await CacciaAlTesoro.create({
+    titolo: "Tesoro di Trento",
+    descrizione: "Un'avventura tra i luoghi più iconici di Trento.",
+    listaSegnaposti: segnapostiCreati.map((sp, index) => ({
+      segnaposto: sp._id,
+      ordine: index + 1 // Ordine crescente da 1 in poi
+    }))
+  });
 
     console.log('Dati inseriti con successo!');
     mongoose.disconnect();

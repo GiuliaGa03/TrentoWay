@@ -249,57 +249,44 @@ Crea un nuovo segnaposto.
                 }
             ]
 
-## Aggiungi quiz esistente a un segnaposto [/api/v1/segnaposti/{id}/quiz]
-### Aggiungi Quiz al Segnaposto [POST /123a45678b9c0d123efg4hij/quiz_id]
+# Group Segnaposti
 
-+ Request (application/json)
+## Aggiungi o rimuovi un quiz a un segnaposto [/api/v1/segnaposti/{id}/quiz/{quizId}]
 
-            {
-                "quiz": quiz
-            }
+### Aggiungi un quiz a un segnaposto [POST]
+
+Associa un quiz esistente a un segnaposto esistente.
+
++ Parameters
+    + id: `664dd329abc1234567890000` (string, required) - ID del segnaposto
+    + quizId: `6651e456def456789abc0001` (string, required) - ID del quiz da aggiungere
+
 + Response 200 (application/json)
+    + Attributes
+        + message: Quiz aggiunto con successo al segnaposto (string)
 
-            {
-                {   
-                    "nome": "nome",
-                    "indirizzo": "indirizzo",
-                    "descrizione": "descrizione",
-                    "coordinate": [0,0],
-                    "punti": 0,
-                    "indizio": "indizio",
-                    "quiz": "New_quizX",
-                    "recensioni": ["...", "..."],
-                    "numeroVisistatori": 0
-                },
-                "Description": "Quiz aggiunto con successo al segnaposto"
-            }
-
-+ Response 400 (application/json)
-
-            {
-                {   
-                    "nome": "nome",
-                    "indirizzo": "indirizzo",
-                    "descrizione": "descrizione",
-                    "coordinate": [0,0],
-                    "punti": 0,
-                    "indizio": "indizio",
-                    "quiz": null,
-                    "recensioni": ["...", "..."],
-                    "numeroVisistatori": 0
-                },
-                "Description": "Dati non validi"
-            }
-        
 + Response 404 (application/json)
+    + Attributes
+        + message: Segnaposto o quiz non trovato (string)
 
-            {
-                {   
-                   "segnaposto": null,
-                },
-                "Description": "Segnaposto o quiz non trovato"
-            }
-        
+---
+
+### Rimuovi un quiz da un segnaposto [DELETE]
+
+Rimuove l'associazione tra un quiz e un segnaposto esistente.
+
++ Parameters
+    + id: `664dd329abc1234567890000` (string, required) - ID del segnaposto
+    + quizId: `6651e456def456789abc0001` (string, required) - ID del quiz da rimuovere
+
++ Response 200 (application/json)
+    + Attributes
+        + message: Quiz rimosso con successo dal segnaposto (string)
+
++ Response 404 (application/json)
+    + Attributes
+        + message: Segnaposto o quiz non trovato (string)
+
 
 ## Quiz generico [/api/v1/quiz]
 ### Lista quiz [GET /]

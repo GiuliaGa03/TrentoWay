@@ -49,6 +49,34 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.put('/:id/ordine', async (req, res) => {
+  try {
+    const caccia = await CacciaAlTesoro.findById(req.params.id);
+    if (!caccia) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
+
+    const nuovaLista = req.body.listaSegnaposti;
+
+    if (!Array.isArray(nuovaLista)) {
+      return res.status(400).json({ message: 'Formato della lista non valido' });
+    }
+
+    //verifica che ogni entry abbia segnaposto e ordine
+    for (const entry of nuovaLista) {
+      if (!entry.segnaposto || typeof entry.ordine !== 'number') {
+        return res.status(400).json({ message: 'Ogni elemento deve contenere segnaposto e ordine' });
+      }
+    }
+
+    caccia.listaSegnaposti = nuovaLista;
+    await caccia.save();
+
+    res.status(200).json({ message: 'Ordine aggiornato con successo' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
 // DELETE: Elimina una caccia al tesoro
 router.delete('/:id', async (req, res) => {
   try {

@@ -368,6 +368,31 @@ paths:
           description: Caccia al tesoro non trovata
         '500':
           description: Errore del server       
+
+    put:
+      tags:
+        - "Caccia al Tesoro"
+      summary: Aggiorna una caccia al tesoro
+      description: Aggiorna esclusivamente i dettagli di una caccia al tesoro esistente (come titolo, descrizione, ecc.), senza modificare i segnaposti associati.
+      parameters: 
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacciaAlTesoro'
+      responses:
+        '200':
+           description: Caccia al tesoro aggiornata con successo
+        '400':
+          description: Dati non validi
+        '404':
+          description: Caccia al tesoro non trovata
     
   /api/v1/cacciaAlTesoro/{id}/segnaposti/{segnapostoId}:
     post:
@@ -417,6 +442,79 @@ paths:
           description: Segnaposto rimosso con successo dalla caccia al tesoro
         '404':
           description: Caccia al tesoro o segnaposto non trovati
+
+
+  /api/v1/cacce/{id}/ordine:
+    put:
+      summary: Aggiorna l'ordine dei segnaposti in una caccia al tesoro
+      description: Permette di modificare l'ordine dei segnaposti associati a una caccia al tesoro esistente.
+      tags:
+        - Cacce al Tesoro
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID della caccia al tesoro da aggiornare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - listaSegnaposti
+              properties:
+                listaSegnaposti:
+                  type: array
+                  description: Lista ordinata di segnaposti con i rispettivi ordini
+                  items:
+                    type: object
+                    required:
+                      - segnaposto
+                      - ordine
+                    properties:
+                      segnaposto:
+                        type: string
+                        description: ID del segnaposto
+                        example: 664dd329abc1234567890000
+                      ordine:
+                        type: integer
+                        description: Ordine del segnaposto all'interno della caccia
+                        example: 1
+      responses:
+        '200':
+          description: Ordine aggiornato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ordine aggiornato con successo
+        '400':
+          description: Errore nei dati della richiesta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Formato della lista non valido
+        '404':
+          description: Caccia al tesoro non trovata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Caccia al tesoro non trovata
+
       
 
 
@@ -502,8 +600,14 @@ components:
           example: "Caccia lungo l'Adige"
         descrizione:
           type: string
-          example: "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andra a a toccare i principali punti di interesse "
+          example: "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse"
         segnaposti:
           type: array
           items:
-            $ref: '#/components/schemas/Segnaposto'
+            type: object
+            properties:
+              segnaposto:
+                $ref: '#/components/schemas/Segnaposto'
+              ordine:
+                type: integer
+                example: 1

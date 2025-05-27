@@ -12,6 +12,7 @@ const app = express();
 const gestoreSegnaposti= require("./routes/gestoreSegnaposto.js");
 const gestoreQuiz = require("./routes/gestoreQuiz.js");
 const gestoreCacciaAlTesoro = require("./routes/gestoreCacciaAlTesoro.js");
+const gestoreAutenticazione= require("./routes/gestoreAutenticazione.js");
 
 
 // Carica il file OpenAPI
@@ -37,7 +38,8 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
 
-
+// Per gestire le richieste di login, registrazione, token e recupero password 
+app.use('/api/v1/autenticazione', gestoreAutenticazione);
 
 //tutte le route per segnaposti vengono gestite da gestoreSegnaposti.js
 app.use('/api/v1/segnaposti', gestoreSegnaposti);

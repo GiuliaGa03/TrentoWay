@@ -44,3 +44,72 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Errore server' });
     }
 });
+
+router.post('/register', async (req, res) => {
+  try {
+    const {
+      username,
+      email,
+      password,
+      confirmPassword,
+      firstName,
+      lastName
+    } = req.body;
+
+    // bisogna controllare se tutti i campi sono stati compilati
+    if (!username || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: 'Tutti i campi obbligatori devono essere compilati' });
+    }
+
+    //si controlla che la password e la conferma password coincidano
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Le password non coincidono' });
+    }
+
+    // verifica utente esistente
+    const utenteEsistente = await Utente.findOne({ email });
+    if (utenteEsistente) {
+      return res.status(400).json({ message: 'Utente già registrato' });
+    }
+
+    // se tutto è andato bene si crea l'utente
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const nuovoUtente = new Utente({
+      username,
+      email,
+      password: hashedPassword,
+      nome: firstName || '',
+      cognome: lastName || '',
+      ruolo: 'utente', // o 'player' se lo usi così nel codice
+    });
+
+    await nuovoUtente.save();
+
+    // si genera poi il token JWT per l'utente appena registrato che scade in 24h
+    const token = jwt.sign(
+      { userId: nuovoUtente._id, role: nuovoUtente.ruolo },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // dopo la registrazione si risponde con un json che contiene il token, i dati dell'utente e un booleano success
+    // e un redirectTo che indica dove reindirizzare l'utente in base al suo ruolo (NB admin/dashboard non esiste ancora)
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: nuovoUtente._id,
+        username: nuovoUtente.username,
+        email: nuovoUtente.email,
+        ruolo: nuovoUtente.ruolo,
+      },
+      redirectTo: nuovoUtente.ruolo === 'amministratore' ? '/admin/dashboard' : '/'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Errore del server durante la registrazione' });
+  }
+});
+
+module.exports = router;

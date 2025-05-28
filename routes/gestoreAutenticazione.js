@@ -1,8 +1,12 @@
 const express = require('express');
 const router =express.Router();
-const Utente =erquire('../models/Utente');
+const Utente =require('../models/Utente');
 const bcrypt = require('bcrypt');
-const database = require('mime-db');
+const UtenteSchema = require('../models/Utente');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+
 
 
 router.post('/login', async (req, res) => {
@@ -10,7 +14,7 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
         
         //presa la mail e password si cerca nel database l'utente con quella mail
-        const utente = await Utente.findOne({ email });
+        const utente = await UtenteSchema.findOne({ email });
         if (!utente){
             return res.status(404).json({ message: "Utente non trovato"});
         }
@@ -23,7 +27,7 @@ router.post('/login', async (req, res) => {
         
         // il token viene generato se la password è corretta
         const token = jwt.sign(
-          { userId: user._id, role: user.role },
+          { userId: utente._id, role: utente.role },
           process.env.JWT_SECRET,
           { expiresIn: '24h' }
         );
@@ -33,19 +37,19 @@ router.post('/login', async (req, res) => {
           success: true,
           token,
           user: {
-            id: user._id,
-            email: user.email,
-            username: user.username,
-            role: user.role
+            id: utente._id,
+            email: utente.email,
+            username: utente.username,
+            role: utente.role
           },
-          redirectTo: user.role === 'admin' ? '/admin/dashboard' : '/game/map'
+          redirectTo: utente.role === 'admin' ? '/' : '/'
         });
     } catch (error) {
         res.status(500).json({ error: 'Errore server' });
     }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/registrazione', async (req, res) => {
   try {
     const {
       username,

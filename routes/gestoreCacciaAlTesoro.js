@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const CacciaAlTesoro = require('../models/CacciaAlTesoro');
 const Segnaposto = require('../models/Segnaposto');
+const Auth = require('../autenticazione/middlewareAutenticazione');
 
 // GET: Tutte le cacce al tesoro
 router.get('/', async (req, res) => {
@@ -28,7 +29,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST: Crea una nuova caccia al tesoro
-router.post('/', async (req, res) => {
+router.post('/', Auth('admin'), async (req, res) => {
   try {
     const nuova = new CacciaAlTesoro(req.body);
     await nuova.save();

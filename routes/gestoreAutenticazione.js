@@ -61,10 +61,29 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Tutti i campi obbligatori devono essere compilati' });
     }
 
-    //si controlla che la password e la conferma password coincidano
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Le password non coincidono' });
+    // si controlla che lo username abbia lunghezza corretta e non contenga caratteri non validi
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (username.length < 3 || username.length > 20 || !usernameRegex.test(username)) {
+      return res.status(400).json({ message: 'Username deve essere tra 3 e 20 caratteri' });
     }
+
+
+    //controllo se rispettate le lunghezze minime e massime password
+    if (password.length < 5 || password.length > 30) {
+      return res.status(400).json({ message: 'La password deve essere lunga tra 5 e 30 caratteri.' });
+    }
+    // si controlla che la password abbia almeno una lettera maiuscola, una minuscola e un numero
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: 'La password deve contenere almeno una lettera maiuscola, una minuscola e un numero.'
+      });
+    }
+    //si controlla che la password e la conferma password coincidano 
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Le password non coincidono.' });
+    }
+
 
     // verifica utente esistente
     const utenteEsistente = await Utente.findOne({ email });
@@ -80,7 +99,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       nome: firstName || '',
       cognome: lastName || '',
-      ruolo: 'utente', // o 'player' se lo usi così nel codice
+      ruolo: 'player', 
     });
 
     await nuovoUtente.save();

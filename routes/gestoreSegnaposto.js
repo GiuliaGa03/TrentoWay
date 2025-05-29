@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Segnaposto = require('../models/Segnaposto');
 const Quiz = require('../models/Quiz');
+const Auth = require('../autenticazione/middlewareAutenticazione');
 
 //restituisce la lista dei segnaposto esistenti
-router.get('/', async (req, res) => {
+router.get('/', Auth('admin') ,async (req, res) => {
   try {
     const segnaposti = await Segnaposto.find().populate('quiz');
     res.status(200).json(segnaposti);

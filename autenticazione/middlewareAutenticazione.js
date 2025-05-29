@@ -24,6 +24,8 @@ const authMiddleware = (...allowedRoles) => {  //i tre puntini indicano che si p
     // essento che l'eader è composto da ' Bearer "token" ' seguito dal token, per prendere il token si divide la stringa
     // tra Bearrer e token dove c'è lo spazio e si prende la seconda parte [1], ovvero solo il token
     const token = authHeader.split(' ')[1]; 
+    
+    
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);

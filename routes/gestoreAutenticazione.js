@@ -27,10 +27,11 @@ router.post('/login', async (req, res) => {
         
         // il token viene generato se la password è corretta
         const token = jwt.sign(
-          { userId: utente._id, role: utente.role },
+          { userId: utente._id, role: utente.ruolo },
           process.env.JWT_SECRET,
           { expiresIn: '24h' }
         );
+        
 
         //se l'autenticazione è avvenuta con successo la risposta contiene un json con il boobleano success con true, il token e tutti i dati utente
         res.json({

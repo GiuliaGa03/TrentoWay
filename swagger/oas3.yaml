@@ -26,7 +26,6 @@ tags:
 
 
 
-
 paths:
   /api/maps-config.js:
     get:
@@ -52,34 +51,54 @@ paths:
     get:
       tags:
         - "Segnaposti"
-      summary: Ottieni tutti i segnaposti
+      summary: Ottieni tutti i segnaposti con quiz associati
+      description: Restituisce una lista di tutti i segnaposti presenti nel sistema, ciascuno con i dati del quiz associato (se esistente).
       responses:
         '200':
-          description: Lista di segnaposti
+          description: Lista di segnaposti con quiz
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Segnaposto'
+                  $ref: '#/components/schemas/SegnapostoPopolato'
         '500':
           description: Errore interno del server
+
+
     post:
       tags:
         - "Segnaposti"
       summary: Crea un nuovo segnaposto
+      description: Solo gli amministratori possono creare un nuovo segnaposto. Il campo `quiz` deve essere un array di ID di quiz esistenti.
+      security:
+        - bearerAuth: []  
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Segnaposto'
+              $ref: '#/components/schemas/SegnapostoInput'
       responses:
         '201':
           description: Segnaposto creato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Segnaposto creato con successo
         '400':
           description: Dati non validi
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 
   /api/v1/segnaposti/{id}:
@@ -100,11 +119,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Segnaposto'
+                $ref: '#/components/schemas/SegnapostoPopolato'
         '404':
           description: Segnaposto non trovato
         '500':
           description: Errore del server
+
     put:
       tags:
         - "Segnaposti"
@@ -123,11 +143,20 @@ paths:
               $ref: '#/components/schemas/Segnaposto'
       responses:
         '200':
-           description: Segnaposto aggiornato con successo
+          description: Segnaposto aggiornato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Segnaposto aggiornato con successo"
         '400':
           description: Dati non validi
         '404':
           description: Segnaposto non trovato
+
     delete:
       tags:
         - "Segnaposti"
@@ -751,6 +780,44 @@ paths:
 
 components:
   schemas:
+    SegnapostoPopolato:
+      allOf:
+        - $ref: '#/components/schemas/Segnaposto'
+        - type: object
+          properties:
+            quiz:
+              $ref: '#/components/schemas/Quiz'
+    
+    SegnapostoInput:
+      type: object
+      required:
+        - titolo
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        indirizzo:
+          type: string
+        quiz:
+          type: array
+          items:
+            type: string
+            description: ID del quiz
+            example: "664f1b6d5ebfd6f94c478e6a"
+        punti:
+          type: integer
+        indizio:
+          type: string
+        coordinate:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+
+
     
     User:
       type: object

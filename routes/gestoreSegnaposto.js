@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Segnaposto = require('../models/Segnaposto');
 const Quiz = require('../models/Quiz');
+const Auth = require('../autenticazione/middlewareAutenticazione');
 
-//restituisce la lista dei segnaposto esistenti
-router.get('/', async (req, res) => {
+//restituisce la lista dei segnaposto esistenti (tutti possono accedere)
+router.get('/',async (req, res) => {
   try {
     const segnaposti = await Segnaposto.find().populate('quiz');
     res.status(200).json(segnaposti);
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// restituisce un singolo segnaposto in base all'ID
+// restituisce un singolo segnaposto in base all'ID (tutti possono accedere)
 router.get('/:id', async (req, res) => {
   try {
     const segnaposto = await Segnaposto.findById(req.params.id).populate('quiz');
@@ -24,11 +25,11 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Crea un nuovo segnaposto
-router.post('/', async (req, res) => {
+// Crea un nuovo segnaposto (solo per gli admin)
+router.post('/', Auth('admin'), async (req, res) => {
   try {
     const nuovo = new Segnaposto(req.body); // quiz deve essere un array di ObjectId
-    const creato = await nuovo.save();
+    await nuovo.save();
     res.status(201).json({ message: 'Segnaposto creato con successo'});
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -36,7 +37,7 @@ router.post('/', async (req, res) => {
 });
 
 // Aggiorna un segnaposto esistente
-router.put('/:id', async (req, res) => {
+router.put('/:id', Auth('admin'), async (req, res) => {
   try {
     const aggiornato = await Segnaposto.findByIdAndUpdate(
       req.params.id,
@@ -51,7 +52,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Elimina un segnaposto esistente
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', Auth('admin'), async (req, res) => {
   try {
     const eliminato = await Segnaposto.findByIdAndDelete(req.params.id);
     if (!eliminato) return res.status(404).json({ message: 'Segnaposto non trovato' });
@@ -61,8 +62,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-
-router.post('/:segnapostoId/quiz/:quizId', async (req, res) => {
+// Aggiunge un quiz a un segnaposto (solo per gli admin)
+router.post('/:segnapostoId/quiz/:quizId', Auth('admin'), async (req, res) => {
   try {
     const { segnapostoId, quizId } = req.params;
 
@@ -83,8 +84,8 @@ router.post('/:segnapostoId/quiz/:quizId', async (req, res) => {
   }
 });
 
-
-router.delete('/:segnapostoId/quiz/:quizId', async (req, res) => {
+// Rimuove un quiz da un segnaposto (solo per gli admin)
+router.delete('/:segnapostoId/quiz/:quizId', Auth('admin'), async (req, res) => {
   try {
     const { segnapostoId, quizId } = req.params;
 
@@ -107,15 +108,6 @@ router.delete('/:segnapostoId/quiz/:quizId', async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
-
-
-
-
-
-
-
-
-
 
 
 

@@ -40,7 +40,7 @@ router.post('/', Auth('admin'), async (req, res) => {
 });
 
 // PUT: Aggiorna una caccia al tesoro
-router.put('/:id', async (req, res) => {
+router.put('/:id',Auth('admin'),  async (req, res) => {
   try {
     const aggiornata = await CacciaAlTesoro.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!aggiornata) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
@@ -50,7 +50,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id/ordine', async (req, res) => {
+// PUT: Aggiorna l'ordine dei segnaposti nella caccia al tesoro
+router.put('/:id/ordine',Auth('admin'),  async (req, res) => {
   try {
     const caccia = await CacciaAlTesoro.findById(req.params.id);
     if (!caccia) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
@@ -79,7 +80,7 @@ router.put('/:id/ordine', async (req, res) => {
 
 
 // DELETE: Elimina una caccia al tesoro
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',Auth('admin'),  async (req, res) => {
   try {
     const eliminata = await CacciaAlTesoro.findByIdAndDelete(req.params.id);
     if (!eliminata) return res.status(404).json({ message: 'Caccia al tesoro non trovata' });
@@ -90,7 +91,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // POST: Aggiunge un segnaposto alla caccia al tesoro con ordine
-router.post('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
+router.post('/:cacciaId/segnaposto/:segnapostoId', Auth('admin'), async (req, res) => {
   try {
     const { cacciaId, segnapostoId } = req.params;
     const { ordine } = req.body; // ordine passato nel body
@@ -122,7 +123,7 @@ router.post('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
 
 
 // DELETE: Rimuove un segnaposto dalla caccia al tesoro
-router.delete('/:cacciaId/segnaposto/:segnapostoId', async (req, res) => {
+router.delete('/:cacciaId/segnaposto/:segnapostoId', Auth('admin'), async (req, res) => {
   try {
     const { cacciaId, segnapostoId } = req.params;
 

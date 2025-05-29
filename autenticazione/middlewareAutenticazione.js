@@ -1,9 +1,9 @@
 //lo scopo del middleware è quello di recuperare il token dalla richiesta
-//controla se è valido e lo spacchetta in modo da recuperare i dati dell'utente
+//controla se è valido e lo spacchetta in modo da recuperare i dati dell'utente (id e ruolo e nulla di più)
 // coi dati utente puo legge il ruolo
-// per evitare poi di far fare il controllo del ruolo alle route questo middleware permette di definire
-// un ruolo specifico che deve essere presente nel token per poter accedere alla route e queto viene 
-// definito nel momemto che si aggiunge il middleware alla route
+// per evitare poi di far fare il controllo del ruolo alle route singole, questo middleware, permette di definire
+// uno o piu ruoli che possono accedere alla route direttamente qunado viene aggiunto (es : router.get('/', Auth('admin', 'player') ,async (req, res) => {....)
+
 
 
 const jwt = require('jsonwebtoken');
@@ -21,7 +21,7 @@ const authMiddleware = (...allowedRoles) => {  //i tre puntini indicano che si p
       return res.status(401).json({ message: 'Token mancante o malformato' });
     }
 
-    // essento che l'eader è composto da ' Bearer "token" ' seguito dal token, per prendere il token si divide la stringa
+    // essento che l'eader è composto da " Bearer 'token' ", per prendere il token si divide la stringa
     // tra Bearrer e token dove c'è lo spazio e si prende la seconda parte [1], ovvero solo il token
     const token = authHeader.split(' ')[1]; 
     
@@ -30,7 +30,7 @@ const authMiddleware = (...allowedRoles) => {  //i tre puntini indicano che si p
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded; // es: { userId: "...", role: "admin" }
-        //la prima condizione controlla se sono stati passati dei ruoli e la seconda se il ruolo dell'utente non è tra quelli consentiti
+        //la prima condizione controlla se sono stati passati dei ruoli al middleware e la seconda se il ruolo passato nel token è tra quelli passati al middleware
       if (allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) { 
         return res.status(403).json({ message: 'Accesso negato: ruolo insufficiente' });
       }

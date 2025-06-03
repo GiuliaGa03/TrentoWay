@@ -790,6 +790,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Segnaposto'
+        '400':
+          description: Richiesta non valida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Richiesta malformata o parametri errati"
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Errore del server, riprova più tardi"
 
   /api/v1/statistiche/nome:
     get:
@@ -805,6 +825,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Segnaposto'
+        '400':
+          description: Richiesta non valida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Richiesta malformata o parametri errati"
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Errore del server, riprova più tardi"
 
   /api/v1/statistiche/voti:
     get:
@@ -820,6 +860,27 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Segnaposto'
+        '400':
+          description: Richiesta non valida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Richiesta malformata o parametri errati"
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Errore del server, riprova più tardi"
+
 
   
             

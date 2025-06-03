@@ -774,6 +774,53 @@ paths:
                   error:
                     type: string
                     example: "Errore durante la registrazione"
+
+  
+  /api/v1/statistiche/visite:
+    get:
+      tags:
+        - "Statistiche"
+      summary: Segnaposti ordinati per numero di visitatori (descrescente)
+      responses:
+        '200':
+          description: Lista ordinata di segnaposti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnaposto'
+
+  /api/v1/statistiche/nome:
+    get:
+      tags:
+        - "Statistiche"
+      summary: Segnaposti ordinati alfabeticamente per nome
+      responses:
+        '200':
+          description: Lista ordinata di segnaposti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnaposto'
+
+  /api/v1/statistiche/voti:
+    get:
+      tags:
+        - "Statistiche"
+      summary: Segnaposti ordinati per voto medio (descrescente)
+      responses:
+        '200':
+          description: Lista ordinata di segnaposti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnaposto'
+
   
             
 

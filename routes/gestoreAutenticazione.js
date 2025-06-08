@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
           redirectTo: utente.role === 'admin' ? '/' : '/'
         });
     } catch (error) {
-        res.status(500).json({ error: 'Errore server' });
+        res.status(500).json({ message: 'Errore server' });
     }
 });
 

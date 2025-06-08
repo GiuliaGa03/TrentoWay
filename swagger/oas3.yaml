@@ -882,6 +882,41 @@ paths:
                     example: "Errore del server, riprova più tardi"
 
 
+  /api/v1/classifica:
+    get:
+      tags:
+        - Classifica
+      summary: Ottiene la classifica degli utenti ordinata per punteggio
+      description: Restituisce la lista di tutti gli utenti, ordinata in base al punteggio in ordine decrescente.
+      responses:
+        '200':
+          description: Lista degli utenti ordinata per punteggio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      example: mario_rossi
+                    punti:
+                      type: number
+                      example: 1200
+        '500':
+          description: Errore interno del server durante il recupero della classifica.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Errore nel recupero della classifica
+                  error:
+                    type: string
+                    example: "TypeError: Cannot read properties of undefined (reading 'find')"
   
             
 

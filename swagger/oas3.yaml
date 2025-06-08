@@ -601,7 +601,124 @@ paths:
                     type: string
                     example: Caccia al tesoro non trovata
 
-  
+  /api/v1/utente/login:
+    post:
+      tags:
+        - "UtenteLogin"
+      summary: Effettua il login di un utente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Nome utente per il login
+                password:
+                  type: string
+                  format: password
+                  description: Password dell'utente
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indica se il login è avvenuto con successo
+                    example: true
+                  token:
+                    type: string
+                    description: JWT token per l'autenticazione delle richieste successive
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTQzMjEwOTg3NjU0MzIxIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjk4ODQ1NzY5LCJleHAiOjE2OTg5MzIxNjl9.xyz123"
+                  user:
+                     $ref: '#/components/schemas/User'
+                  redirectTo:
+                    type: string
+                    description: URL di redirect basato sul ruolo dell'utente
+                    example: "/admin/dashboard"
+              examples:
+                admin_response:
+                  summary: Risposta per Admin
+                  value:
+                    success: true
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTQzMjEwOTg3NjU0MzIxIiwicm9sZSI6ImFkbWluIn0.xyz123"
+                    user:
+                      id: "654321098765432"
+                      email: "admin@example.com"
+                      username: "adminUser"
+                      role: "admin"
+                    redirectTo: "/admin/dashboard"
+                player_response:
+                  summary: Risposta per Player
+                  value:
+                    success: true
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTQzMjEwOTg3NjU0MzIxIiwicm9sZSI6InBsYXllciJ9.abc456"
+                    user:
+                      id: "654321098765433"
+                      email: "player@example.com"
+                      username: "playerOne"
+                      role: "player"
+                    redirectTo: "/game/map"
+        '400':
+          description: Richiesta non valida - dati mancanti o formato errato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Messaggio di errore
+                    example: "Email o password mancanti"
+        '401':
+          description: Credenziali non valide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Messaggio di errore di autenticazione
+                    example: "Credenziali non valide"
+        '429':
+          description: Troppi tentativi di login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Messaggio di rate limiting
+                  retryAfter:
+                    type: integer
+                    description: Secondi da attendere prima del prossimo tentativo
+              example:
+                error: "Troppi tentativi di login. Riprova tra qualche minuto"
+                retryAfter: 300
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Messaggio di errore generico
+                    example: "Errore interno del server"
+              
+
               
 
   /api/v1/utente/registrazione:

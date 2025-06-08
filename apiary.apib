@@ -676,7 +676,68 @@ Permette di modificare l'ordine dei segnaposti associati a una caccia al tesoro 
 
 # Group Utente Registrazione
 
-## Registrazione Utente [/api/v1/utente/registrazione]
+
+## Login Utente [/api/v1/utente/login]
+
+### Effettua il login [POST]
+
+Effettua il login di un utente esistente nel sistema.
+
++ Request (application/json)
+    + Body
+    
+            {
+                "username": "playerOne",
+                "password": "MySecurePass123"
+            }
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "success": true,
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTQzMjEwOTg3NjU0MzIxIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjk4ODQ1NzY5LCJleHAiOjE2OTg5MzIxNjl9.xyz123",
+                "user": {
+                    "id": "654321098765432",
+                    "email": "admin@example.com",
+                    "username": "adminUser",
+                    "role": "admin"
+                },
+                "redirectTo": "/admin/dashboard"
+            }
+
++ Response 400 (application/json)
+    + Body
+    
+            {
+                "error": "Email o password mancanti"
+            }
+
++ Response 401 (application/json)
+    + Body
+    
+            {
+                "error": "Credenziali non valide"
+            }
+
++ Response 429 (application/json)
+    + Body
+    
+            {
+                "error": "Troppi tentativi di login. Riprova tra qualche minuto",
+                "retryAfter": 300
+            }
+
++ Response 500 (application/json)
+    + Body
+    
+            {
+                "error": "Errore interno del server"
+            }
+
+
+
+## Autenticazione Utente [/api/v1/utente/registrazione]
 
 ### Registra nuovo utente [POST]
 

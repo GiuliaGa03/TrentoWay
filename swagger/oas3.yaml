@@ -26,7 +26,6 @@ tags:
 
 
 
-
 paths:
   /api/maps-config.js:
     get:
@@ -52,34 +51,54 @@ paths:
     get:
       tags:
         - "Segnaposti"
-      summary: Ottieni tutti i segnaposti
+      summary: Ottieni tutti i segnaposti con quiz associati
+      description: Restituisce una lista di tutti i segnaposti presenti nel sistema, ciascuno con i dati del quiz associato (se esistente).
       responses:
         '200':
-          description: Lista di segnaposti
+          description: Lista di segnaposti con quiz
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Segnaposto'
+                  $ref: '#/components/schemas/SegnapostoPopolato'
         '500':
           description: Errore interno del server
+
+
     post:
       tags:
         - "Segnaposti"
       summary: Crea un nuovo segnaposto
+      description: Solo gli amministratori possono creare un nuovo segnaposto. Il campo `quiz` deve essere un array di ID di quiz esistenti.
+      security:
+        - bearerAuth: []  
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Segnaposto'
+              $ref: '#/components/schemas/SegnapostoInput'
       responses:
         '201':
           description: Segnaposto creato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Segnaposto creato con successo
         '400':
           description: Dati non validi
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 
   /api/v1/segnaposti/{id}:
@@ -100,11 +119,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Segnaposto'
+                $ref: '#/components/schemas/SegnapostoPopolato'
         '404':
           description: Segnaposto non trovato
         '500':
           description: Errore del server
+
     put:
       tags:
         - "Segnaposti"
@@ -123,11 +143,20 @@ paths:
               $ref: '#/components/schemas/Segnaposto'
       responses:
         '200':
-           description: Segnaposto aggiornato con successo
+          description: Segnaposto aggiornato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Segnaposto aggiornato con successo"
         '400':
           description: Dati non validi
         '404':
           description: Segnaposto non trovato
+
     delete:
       tags:
         - "Segnaposti"
@@ -148,12 +177,12 @@ paths:
     
 
   /api/v1/segnaposti/{id}/quiz/{quizId}:
-    post: 
+    post:
       tags:
         - Segnaposti
       summary: Aggiungi un quiz a un segnaposto
-      description: Associa un quiz esistente a un segnaposto esistente.
-      parameters: 
+      description: Associa un quiz esistente a un segnaposto esistente. Solo gli admin possono eseguire questa operazione.
+      parameters:
         - in: path
           name: id
           required: true
@@ -169,15 +198,41 @@ paths:
       responses:
         '200':
           description: Quiz aggiunto con successo al segnaposto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Quiz associato al segnaposto"
         '404':
           description: Segnaposto o quiz non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Segnaposto non trovato"  # oppure "Quiz non trovato"
+        '400':
+          description: Errore di validazione o associazione
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Messaggio di errore generico"
 
     delete:
       tags:
         - Segnaposti
       summary: Rimuovi un quiz da un segnaposto
-      description: Rimuove l'associazione tra un quiz e un segnaposto esistente.
-      parameters: 
+      description: Rimuove l'associazione tra un quiz e un segnaposto esistente. Solo gli admin possono eseguire questa operazione.
+      parameters:
         - in: path
           name: id
           required: true
@@ -193,8 +248,34 @@ paths:
       responses:
         '200':
           description: Quiz rimosso con successo dal segnaposto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Quiz dissociato dal segnaposto"
         '404':
           description: Segnaposto o quiz non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Segnaposto non trovato"  # oppure "Quiz non trovato"
+        '400':
+          description: Il quiz non è associato al segnaposto o altro errore
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Il quiz non è associato a questo segnaposto"
 
 
 
@@ -638,6 +719,8 @@ paths:
                     example: "Errore interno del server"
               
 
+              
+
   /api/v1/utente/registrazione:
     post:
       tags:
@@ -665,7 +748,7 @@ paths:
                 username:
                   type: string
                   minLength: 3
-                  maxLength: 30
+                  maxLength: 20
                   pattern: '^[a-zA-Z0-9_]+$'
                   description: Nome utente (solo lettere, numeri e underscore)
                   example: "playerOne"
@@ -677,8 +760,9 @@ paths:
                 password:
                   type: string
                   format: password
-                  minLength: 8
-                  description: Password (minimo 8 caratteri, deve contenere almeno una lettera maiuscola, una minuscola e un numero)
+                  minLength: 5
+                  maxLength: 30
+                  description: Password (minimo 5 caratteri, almeno una maiuscola, una minuscola e un numero)
                   example: "MySecurePass123"
                 confirmPassword:
                   type: string
@@ -708,7 +792,7 @@ paths:
                     example: true
                   token:
                     type: string
-                    description: Token JWT rilasciato all’utente
+                    description: Token JWT rilasciato dopo la registrazione
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                   user:
                     type: object
@@ -722,9 +806,12 @@ paths:
                       email:
                         type: string
                         example: "player@example.com"
-                      role:
+                      ruolo:
                         type: string
                         example: "player"
+                  redirectTo:
+                    type: string
+                    example: "/"
         '400':
           description: Dati mancanti o non validi
           content:
@@ -732,9 +819,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
-                    example: "Email già registrata o campi obbligatori mancanti"
+                    example: "Utente già registrato" 
         '500':
           description: Errore interno del server
           content:
@@ -742,15 +829,53 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
-                    example: "Errore durante la registrazione"
-  
+                    example: "Errore del server durante la registrazione"
+
             
 
 
 components:
   schemas:
+    SegnapostoPopolato:
+      allOf:
+        - $ref: '#/components/schemas/Segnaposto'
+        - type: object
+          properties:
+            quiz:
+              $ref: '#/components/schemas/Quiz'
+    
+    SegnapostoInput:
+      type: object
+      required:
+        - titolo
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        indirizzo:
+          type: string
+        quiz:
+          type: array
+          items:
+            type: string
+            description: ID del quiz
+            example: "664f1b6d5ebfd6f94c478e6a"
+        punti:
+          type: integer
+        indizio:
+          type: string
+        coordinate:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+
+
     
     User:
       type: object

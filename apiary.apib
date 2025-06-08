@@ -1,20 +1,13 @@
 FORMAT: 1A
 HOST: http://localhost:3000
 
-# TrentoWay
+# My Web Service API
 
-**Idea del Progetto**: TrentoWay è un’applicazione web interattiva che valorizza il patrimonio culturale della città di Trento tramite mappe, quiz e cacce al tesoro legate a luoghi reali.
-Gli utenti guadagnano punti esplorando la città, in questo modo si incentiva il movimento e l’apprendimento attivo. 
-Il sistema include classifiche, recensioni e funzionalità amministrative per la gestione dei contenuti, supportando ruoli differenziati per utenti e per amministratori comunali.
-
-
-TrentoWay è composta dalle seguenti API:
+API per la gestione di segnaposti, cacce al tesoro e quiz.
 
 # Group Google Maps
 
-Gestione della chiave API di Google Maps
-
-## Maps Config [/api/maps-config.js]
+## Google Maps Configuration [/api/maps-config.js]
 
 ### Ottieni configurazione Google Maps [GET]
 
@@ -23,26 +16,33 @@ La chiave viene caricata come variabile globale `window.GOOGLE_MAPS_API_KEY`.
 **Nota:** La chiave API è esposta in chiaro ma è stata limitata a richieste da domini specifici.
 
 + Response 200 (application/javascript)
-
-        window.GOOGLE_MAPS_API_KEY = "YOUR_API_KEY";
+    + Body
+    
+            window.GOOGLE_MAPS_API_KEY = "YOUR_API_KEY";
 
 # Group Segnaposti
-
-Gestione dei segnaposti
 
 ## Segnaposti Collection [/api/v1/segnaposti]
 
 ### Ottieni tutti i segnaposti [GET]
 
-+ Response 200 (application/json)
+Restituisce una lista di tutti i segnaposti presenti nel sistema, ciascuno con i dati del quiz associato (se esistente).
 
-        [
-            {
-                "titolo": "Duomo di Trento",
-                "descrizione": "La principale cattedrale di Trento.",
-                "indirizzo": "Piazza Duomo, Trento",
-                "quiz": [
-                    {
++ Response 200 (application/json)
+    + Body
+    
+            [
+                {
+                    "titolo": "Duomo di Trento",
+                    "descrizione": "La principale cattedrale di Trento.",
+                    "indirizzo": "Piazza Duomo, Trento",
+                    "punti": 10,
+                    "indizio": "Dirigiti alla chiesa più importante di Trento.",
+                    "coordinate": {
+                        "lat": 46.066667,
+                        "lng": 11.116667
+                    },
+                    "quiz": {
                         "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
                         "risposte": [
                             {
@@ -52,7 +52,32 @@ Gestione dei segnaposti
                         ],
                         "punti": 5
                     }
-                ],
+                }
+            ]
+
++ Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore interno del server"
+            }
+
+### Crea nuovo segnaposto [POST]
+
+Solo gli amministratori possono creare un nuovo segnaposto. Il campo `quiz` deve essere un array di ID di quiz esistenti.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Bearer TOKEN
+    
+    + Body
+    
+            {
+                "titolo": "Duomo di Trento",
+                "descrizione": "La principale cattedrale di Trento.",
+                "indirizzo": "Piazza Duomo, Trento",
+                "quiz": ["664f1b6d5ebfd6f94c478e6a"],
                 "punti": 10,
                 "indizio": "Dirigiti alla chiesa più importante di Trento.",
                 "coordinate": {
@@ -60,69 +85,42 @@ Gestione dei segnaposti
                     "lng": 11.116667
                 }
             }
-        ]
-
-+ Response 500 (application/json)
-
-        {
-            "error": "Errore interno del server"
-        }
-
-### Crea un nuovo segnaposto [POST]
-
-+ Request (application/json)
-
-        {
-            "titolo": "Duomo di Trento",
-            "descrizione": "La principale cattedrale di Trento.",
-            "indirizzo": "Piazza Duomo, Trento",
-            "quiz": [
-                {
-                    "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
-                    "risposte": [
-                        {
-                            "testo": "Nella prima metà del 1200",
-                            "corretta": true
-                        }
-                    ],
-                    "punti": 5
-                }
-            ],
-            "punti": 10,
-            "indizio": "Dirigiti alla chiesa più importante di Trento.",
-            "coordinate": {
-                "lat": 46.066667,
-                "lng": 11.116667
-            }
-        }
 
 + Response 201 (application/json)
-
-        {
-            "message": "Segnaposto creato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto creato con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 ## Segnaposto [/api/v1/segnaposti/{id}]
 
 + Parameters
-    + id (string) - ID del segnaposto
+    + id (string, required) - ID del segnaposto
 
-### Ottieni un segnaposto specifico [GET]
+### Ottieni segnaposto specifico [GET]
 
 + Response 200 (application/json)
-
-        {
-            "titolo": "Duomo di Trento",
-            "descrizione": "La principale cattedrale di Trento.",
-            "indirizzo": "Piazza Duomo, Trento",
-            "quiz": [
-                {
+    + Body
+    
+            {
+                "titolo": "Duomo di Trento",
+                "descrizione": "La principale cattedrale di Trento.",
+                "indirizzo": "Piazza Duomo, Trento",
+                "punti": 10,
+                "indizio": "Dirigiti alla chiesa più importante di Trento.",
+                "coordinate": {
+                    "lat": 46.066667,
+                    "lng": 11.116667
+                },
+                "quiz": {
                     "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
                     "risposte": [
                         {
@@ -132,142 +130,173 @@ Gestione dei segnaposti
                     ],
                     "punti": 5
                 }
-            ],
-            "punti": 10,
-            "indizio": "Dirigiti alla chiesa più importante di Trento.",
-            "coordinate": {
-                "lat": 46.066667,
-                "lng": 11.116667
             }
-        }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Segnaposto non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto non trovato"
+            }
 
 + Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
-        {
-            "error": "Errore del server"
-        }
-
-### Aggiorna un segnaposto [PUT]
+### Aggiorna segnaposto [PUT]
 
 + Request (application/json)
-
-        {
-            "titolo": "Duomo di Trento",
-            "descrizione": "La principale cattedrale di Trento.",
-            "indirizzo": "Piazza Duomo, Trento",
-            "quiz": [
-                {
-                    "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
-                    "risposte": [
-                        {
-                            "testo": "Nella prima metà del 1200",
-                            "corretta": true
-                        }
-                    ],
-                    "punti": 5
+    + Body
+    
+            {
+                "titolo": "Duomo di Trento",
+                "descrizione": "La principale cattedrale di Trento.",
+                "indirizzo": "Piazza Duomo, Trento",
+                "punti": 10,
+                "indizio": "Dirigiti alla chiesa più importante di Trento.",
+                "coordinate": {
+                    "lat": 46.066667,
+                    "lng": 11.116667
                 }
-            ],
-            "punti": 10,
-            "indizio": "Dirigiti alla chiesa più importante di Trento.",
-            "coordinate": {
-                "lat": 46.066667,
-                "lng": 11.116667
             }
-        }
 
 + Response 200 (application/json)
-
-        {
-            "message": "Segnaposto aggiornato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto aggiornato con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Segnaposto non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto non trovato"
+            }
 
 ### Elimina segnaposto [DELETE]
 
 + Response 200 (application/json)
-
-        {
-            "message": "Segnaposto eliminato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto eliminato con successo"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Segnaposto non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto non trovato"
+            }
 
 + Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
-        {
-            "error": "Errore del server"
-        }
-
-## Segnaposto Quiz [/api/v1/segnaposti/{id}/quiz/{quizId}]
+## Quiz associati a Segnaposto [/api/v1/segnaposti/{id}/quiz/{quizId}]
 
 + Parameters
-    + id (string) - ID del segnaposto
-    + quizId (string) - ID del quiz
+    + id (string, required) - ID del segnaposto
+    + quizId (string, required) - ID del quiz
 
-### Aggiungi un quiz a un segnaposto [POST]
+### Aggiungi quiz a segnaposto [POST]
 
-Associa un quiz esistente a un segnaposto esistente.
-
-+ Response 200 (application/json)
-
-        {
-            "message": "Quiz aggiunto con successo al segnaposto"
-        }
-
-+ Response 404 (application/json)
-
-        {
-            "error": "Segnaposto o quiz non trovato"
-        }
-
-### Rimuovi un quiz da un segnaposto [DELETE]
-
-Rimuove l'associazione tra un quiz e un segnaposto esistente.
+Associa un quiz esistente a un segnaposto esistente. Solo gli admin possono eseguire questa operazione.
 
 + Response 200 (application/json)
+    + Body
+    
+            {
+                "message": "Quiz associato al segnaposto"
+            }
 
-        {
-            "message": "Quiz rimosso con successo dal segnaposto"
-        }
++ Response 400 (application/json)
+    + Body
+    
+            {
+                "message": "Messaggio di errore generico"
+            }
 
 + Response 404 (application/json)
+    + Body
+    
+            {
+                "message": "Segnaposto non trovato"
+            }
 
-        {
-            "error": "Segnaposto o quiz non trovato"
-        }
+### Rimuovi quiz da segnaposto [DELETE]
+
+Rimuove l'associazione tra un quiz e un segnaposto esistente. Solo gli admin possono eseguire questa operazione.
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "message": "Quiz dissociato dal segnaposto"
+            }
+
++ Response 400 (application/json)
+    + Body
+    
+            {
+                "message": "Il quiz non è associato a questo segnaposto"
+            }
+
++ Response 404 (application/json)
+    + Body
+    
+            {
+                "message": "Segnaposto non trovato"
+            }
 
 # Group Quiz
-
-Gestione dei quiz
 
 ## Quiz Collection [/api/v1/quiz]
 
 ### Ottieni tutti i quiz [GET]
 
 + Response 200 (application/json)
+    + Body
+    
+            [
+                {
+                    "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
+                    "risposte": [
+                        {
+                            "testo": "Nella prima metà del 1200",
+                            "corretta": true
+                        }
+                    ],
+                    "punti": 5
+                }
+            ]
 
-        [
++ Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore interno del server"
+            }
+
+### Crea nuovo quiz [POST]
+
++ Request (application/json)
+    + Body
+    
             {
                 "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
                 "risposte": [
@@ -278,137 +307,153 @@ Gestione dei quiz
                 ],
                 "punti": 5
             }
-        ]
-
-+ Response 500 (application/json)
-
-        {
-            "error": "Errore interno del server"
-        }
-
-### Crea un nuovo quiz [POST]
-
-+ Request (application/json)
-
-        {
-            "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
-            "risposte": [
-                {
-                    "testo": "Nella prima metà del 1200",
-                    "corretta": true
-                }
-            ],
-            "punti": 5
-        }
 
 + Response 201 (application/json)
-
-        {
-            "message": "Quiz creato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Quiz creato con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 ## Quiz [/api/v1/quiz/{id}]
 
 + Parameters
-    + id (string) - ID del quiz
+    + id (string, required) - ID del quiz
 
-### Ottieni un quiz specifico [GET]
+### Ottieni quiz specifico [GET]
 
 + Response 200 (application/json)
-
-        {
-            "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
-            "risposte": [
-                {
-                    "testo": "Nella prima metà del 1200",
-                    "corretta": true
-                }
-            ],
-            "punti": 5
-        }
+    + Body
+    
+            {
+                "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
+                "risposte": [
+                    {
+                        "testo": "Nella prima metà del 1200",
+                        "corretta": true
+                    }
+                ],
+                "punti": 5
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Quiz non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Quiz non trovato"
+            }
 
 + Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
-        {
-            "error": "Errore del server"
-        }
-
-### Aggiorna un quiz [PUT]
+### Aggiorna quiz [PUT]
 
 + Request (application/json)
-
-        {
-            "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
-            "risposte": [
-                {
-                    "testo": "Nella prima metà del 1200",
-                    "corretta": true
-                }
-            ],
-            "punti": 5
-        }
+    + Body
+    
+            {
+                "domanda": "Quando è stato costruito il castello del Buonconsiglio?",
+                "risposte": [
+                    {
+                        "testo": "Nella prima metà del 1200",
+                        "corretta": true
+                    }
+                ],
+                "punti": 5
+            }
 
 + Response 200 (application/json)
-
-        {
-            "message": "Quiz aggiornato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Quiz aggiornato con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Quiz non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Quiz non trovato"
+            }
 
 ### Elimina quiz [DELETE]
 
 + Response 200 (application/json)
-
-        {
-            "message": "Quiz eliminato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Quiz eliminato con successo"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Quiz non trovato"
-        }
+    + Body
+    
+            {
+                "message": "Quiz non trovato"
+            }
 
 + Response 500 (application/json)
-
-        {
-            "error": "Errore del server"
-        }
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
 # Group Caccia al Tesoro
 
-Gestione delle cacce al tesoro
-
-## Cacce al Tesoro Collection [/api/v1/cacciaAlTesoro]
+## Caccie al Tesoro Collection [/api/v1/cacciaAlTesoro]
 
 ### Ottieni tutte le cacce al tesoro [GET]
 
 + Response 200 (application/json)
+    + Body
+    
+            [
+                {
+                    "titolo": "Caccia lungo l'Adige",
+                    "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse",
+                    "segnaposti": [
+                        {
+                            "segnaposto": {
+                                "titolo": "Duomo di Trento",
+                                "descrizione": "La principale cattedrale di Trento.",
+                                "indirizzo": "Piazza Duomo, Trento",
+                                "punti": 10,
+                                "indizio": "Dirigiti alla chiesa più importante di Trento.",
+                                "coordinate": {
+                                    "lat": 46.066667,
+                                    "lng": 11.116667
+                                }
+                            },
+                            "ordine": 1
+                        }
+                    ]
+                }
+            ]
 
-        [
+### Crea nuova caccia al tesoro [POST]
+
++ Request (application/json)
+    + Body
+    
             {
                 "titolo": "Caccia lungo l'Adige",
                 "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse",
@@ -419,6 +464,7 @@ Gestione delle cacce al tesoro
                             "descrizione": "La principale cattedrale di Trento.",
                             "indirizzo": "Piazza Duomo, Trento",
                             "punti": 10,
+                            "indizio": "Dirigiti alla chiesa più importante di Trento.",
                             "coordinate": {
                                 "lat": 46.066667,
                                 "lng": 11.116667
@@ -428,310 +474,251 @@ Gestione delle cacce al tesoro
                     }
                 ]
             }
-        ]
-
-### Crea una nuova caccia al tesoro [POST]
-
-+ Request (application/json)
-
-        {
-            "titolo": "Caccia lungo l'Adige",
-            "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse",
-            "segnaposti": [
-                {
-                    "segnaposto": {
-                        "titolo": "Duomo di Trento",
-                        "descrizione": "La principale cattedrale di Trento.",
-                        "indirizzo": "Piazza Duomo, Trento",
-                        "punti": 10,
-                        "coordinate": {
-                            "lat": 46.066667,
-                            "lng": 11.116667
-                        }
-                    },
-                    "ordine": 1
-                }
-            ]
-        }
 
 + Response 201 (application/json)
-
-        {
-            "message": "Caccia al tesoro creata con successo"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro creata con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 ## Caccia al Tesoro [/api/v1/cacciaAlTesoro/{id}]
 
 + Parameters
-    + id (string) - ID della caccia al tesoro
+    + id (string, required) - ID della caccia al tesoro
 
-### Ottieni una caccia al tesoro specifica [GET]
+### Ottieni caccia al tesoro specifica [GET]
 
 + Response 200 (application/json)
-
-        {
-            "titolo": "Caccia lungo l'Adige",
-            "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse",
-            "segnaposti": [
-                {
-                    "segnaposto": {
-                        "titolo": "Duomo di Trento",
-                        "descrizione": "La principale cattedrale di Trento.",
-                        "indirizzo": "Piazza Duomo, Trento",
-                        "punti": 10,
-                        "coordinate": {
-                            "lat": 46.066667,
-                            "lng": 11.116667
-                        }
-                    },
-                    "ordine": 1
-                }
-            ]
-        }
+    + Body
+    
+            {
+                "titolo": "Caccia lungo l'Adige",
+                "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse",
+                "segnaposti": [
+                    {
+                        "segnaposto": {
+                            "titolo": "Duomo di Trento",
+                            "descrizione": "La principale cattedrale di Trento.",
+                            "indirizzo": "Piazza Duomo, Trento",
+                            "punti": 10,
+                            "indizio": "Dirigiti alla chiesa più importante di Trento.",
+                            "coordinate": {
+                                "lat": 46.066667,
+                                "lng": 11.116667
+                            }
+                        },
+                        "ordine": 1
+                    }
+                ]
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Caccia al tesoro non trovata"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro non trovata"
+            }
 
 + Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
-        {
-            "error": "Errore del server"
-        }
-
-### Aggiorna una caccia al tesoro [PUT]
+### Aggiorna caccia al tesoro [PUT]
 
 Aggiorna esclusivamente i dettagli di una caccia al tesoro esistente (come titolo, descrizione, ecc.), senza modificare i segnaposti associati.
 
 + Request (application/json)
-
-        {
-            "titolo": "Caccia lungo l'Adige",
-            "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse"
-        }
+    + Body
+    
+            {
+                "titolo": "Caccia lungo l'Adige",
+                "descrizione": "La caccia al tesoro si sviluppa principalmente lungo il fiume Adige e andrà a toccare i principali punti di interesse"
+            }
 
 + Response 200 (application/json)
-
-        {
-            "message": "Caccia al tesoro aggiornata con successo"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro aggiornata con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Dati non validi"
-        }
+    + Body
+    
+            {
+                "message": "Dati non validi"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Caccia al tesoro non trovata"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro non trovata"
+            }
 
 ### Elimina caccia al tesoro [DELETE]
 
 + Response 200 (application/json)
-
-        {
-            "message": "Caccia al tesoro eliminata con successo"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro eliminata con successo"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Caccia al tesoro non trovata"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro non trovata"
+            }
 
 + Response 500 (application/json)
+    + Body
+    
+            {
+                "message": "Errore del server"
+            }
 
-        {
-            "error": "Errore del server"
-        }
-
-## Caccia al Tesoro Segnaposti [/api/v1/cacciaAlTesoro/{id}/segnaposti/{segnapostoId}]
+## Segnaposti nelle Cacce al Tesoro [/api/v1/cacciaAlTesoro/{id}/segnaposti/{segnapostoId}]
 
 + Parameters
-    + id (string) - ID della caccia al tesoro
-    + segnapostoId (string) - ID del segnaposto
+    + id (string, required) - ID della caccia al tesoro
+    + segnapostoId (string, required) - ID del segnaposto
 
 ### Aggiungi segnaposto a caccia al tesoro [POST]
 
 Associa un segnaposto esistente a una caccia al tesoro esistente.
 
 + Response 200 (application/json)
-
-        {
-            "message": "Segnaposto aggiunto con successo"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto aggiunto con successo"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Caccia al tesoro o segnaposto non trovati"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro o segnaposto non trovati"
+            }
 
 ### Rimuovi segnaposto da caccia al tesoro [DELETE]
 
 Rimuove un'associazione tra una caccia al tesoro e un segnaposto.
 
 + Response 200 (application/json)
-
-        {
-            "message": "Segnaposto rimosso con successo dalla caccia al tesoro"
-        }
+    + Body
+    
+            {
+                "message": "Segnaposto rimosso con successo dalla caccia al tesoro"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "error": "Caccia al tesoro o segnaposto non trovati"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro o segnaposto non trovati"
+            }
 
 ## Ordine Segnaposti [/api/v1/cacce/{id}/ordine]
 
 + Parameters
-    + id (string) - ID della caccia al tesoro
+    + id (string, required) - ID della caccia al tesoro
 
 ### Aggiorna ordine segnaposti [PUT]
 
 Permette di modificare l'ordine dei segnaposti associati a una caccia al tesoro esistente.
 
 + Request (application/json)
-
-        {
-            "listaSegnaposti": [
-                {
-                    "segnaposto": "664dd329abc1234567890000",
-                    "ordine": 1
-                }
-            ]
-        }
+    + Body
+    
+            {
+                "listaSegnaposti": [
+                    {
+                        "segnaposto": "664dd329abc1234567890000",
+                        "ordine": 1
+                    }
+                ]
+            }
 
 + Response 200 (application/json)
-
-        {
-            "message": "Ordine aggiornato con successo"
-        }
+    + Body
+    
+            {
+                "message": "Ordine aggiornato con successo"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "message": "Formato della lista non valido"
-        }
+    + Body
+    
+            {
+                "message": "Formato della lista non valido"
+            }
 
 + Response 404 (application/json)
-
-        {
-            "message": "Caccia al tesoro non trovata"
-        }
-
-# Group Utente Login
-
-Gestione del login degli utenti
-
-## Login [/api/v1/utente/login]
-
-### Effettua login [POST]
-
-+ Request (application/json)
-
-        {
-            "username": "adminUser",
-            "password": "MySecurePass123"
-        }
-
-+ Response 200 (application/json)
-
-        {
-            "success": true,
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTQzMjEwOTg3NjU0MzIxIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjk4ODQ1NzY5LCJleHAiOjE2OTg5MzIxNjl9.xyz123",
-            "user": {
-                "id": "654321098765432",
-                "email": "admin@example.com",
-                "username": "adminUser",
-                "role": "admin"
-            },
-            "redirectTo": "/admin/dashboard"
-        }
-
-+ Response 400 (application/json)
-
-        {
-            "error": "Email o password mancanti"
-        }
-
-+ Response 401 (application/json)
-
-        {
-            "error": "Credenziali non valide"
-        }
-
-+ Response 429 (application/json)
-
-        {
-            "error": "Troppi tentativi di login. Riprova tra qualche minuto",
-            "retryAfter": 300
-        }
-
-+ Response 500 (application/json)
-
-        {
-            "error": "Errore interno del server"
-        }
+    + Body
+    
+            {
+                "message": "Caccia al tesoro non trovata"
+            }
 
 # Group Utente Registrazione
 
-Gestione della registrazione degli utenti
-
-## Registrazione [/api/v1/utente/registrazione]
+## Registrazione Utente [/api/v1/utente/registrazione]
 
 ### Registra nuovo utente [POST]
 
-Registra un nuovo utente nel sistema. Per default tutti i nuovi utenti
-vengono creati con ruolo 'player'. Solo gli amministratori esistenti
-possono creare nuovi utenti con ruolo 'admin' tramite un endpoint dedicato.
-Dopo la registrazione successful, l'utente riceve un JWT token e viene
-automaticamente loggato nel sistema.
+Registra un nuovo utente nel sistema. Per default tutti i nuovi utenti vengono creati con ruolo 'player'. Solo gli amministratori esistenti possono creare nuovi utenti con ruolo 'admin' tramite un endpoint dedicato. Dopo la registrazione successful, l'utente riceve un JWT token e viene automaticamente loggato nel sistema.
 
 + Request (application/json)
-
-        {
-            "username": "playerOne",
-            "email": "player@example.com",
-            "password": "MySecurePass123",
-            "confirmPassword": "MySecurePass123",
-            "firstName": "Mario",
-            "lastName": "Rossi"
-        }
-
-+ Response 201 (application/json)
-
-        {
-            "success": true,
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "user": {
-                "id": "60f7a29fbdaf5c001f9d7f82",
+    + Body
+    
+            {
                 "username": "playerOne",
                 "email": "player@example.com",
-                "role": "player"
+                "password": "MySecurePass123",
+                "confirmPassword": "MySecurePass123",
+                "firstName": "Mario",
+                "lastName": "Rossi"
             }
-        }
+
++ Response 201 (application/json)
+    + Body
+    
+            {
+                "success": true,
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "user": {
+                    "id": "60f7a29fbdaf5c001f9d7f82",
+                    "username": "playerOne",
+                    "email": "player@example.com",
+                    "ruolo": "player"
+                },
+                "redirectTo": "/"
+            }
 
 + Response 400 (application/json)
-
-        {
-            "error": "Email già registrata o campi obbligatori mancanti"
-        }
+    + Body
+    
+            {
+                "message": "Utente già registrato"
+            }
 
 + Response 500 (application/json)
-
-        {
-            "error": "Errore durante la registrazione"
-        }
+    + Body
+    
+            {
+                "message": "Errore del server durante la registrazione"
+            }

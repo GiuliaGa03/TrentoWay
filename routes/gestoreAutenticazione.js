@@ -127,7 +127,7 @@ router.post('/registrazione', async (req, res) => {
         email: nuovoUtente.email,
         ruolo: nuovoUtente.ruolo,
       },
-      redirectTo: nuovoUtente.ruolo === 'amministratore' ? '/admin/dashboard' : '/'
+      redirectTo: '/'
     });
 
   } catch (error) {

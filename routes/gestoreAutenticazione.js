@@ -41,10 +41,11 @@ router.post('/login', async (req, res) => {
             id: utente._id,
             email: utente.email,
             username: utente.username,
-            role: utente.role
+            ruolo: utente.ruolo
           },
-          redirectTo: utente.role === 'admin' ? '/' : '/'
+          redirectTo: utente.ruolo === 'admin' ? '/admin/dashboard' : '/'
         });
+        
     } catch (error) {
         res.status(500).json({ error: 'Errore server' });
     }

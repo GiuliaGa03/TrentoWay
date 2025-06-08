@@ -47,7 +47,7 @@ router.post('/login', async (req, res) => {
         });
         
     } catch (error) {
-        res.status(500).json({ error: 'Errore server' });
+        res.status(500).json({ message: 'Errore server' });
     }
 });
 
@@ -128,7 +128,7 @@ router.post('/registrazione', async (req, res) => {
         email: nuovoUtente.email,
         ruolo: nuovoUtente.ruolo,
       },
-      redirectTo: nuovoUtente.ruolo === 'amministratore' ? '/admin/dashboard' : '/'
+      redirectTo: '/'
     });
 
   } catch (error) {

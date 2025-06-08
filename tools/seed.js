@@ -5,6 +5,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const Segnaposto = require('../models/Segnaposto');
 const Quiz = require('../models/Quiz');
 const CacciaAlTesoro = require('../models/CacciaAlTesoro');
+const Utente = require('../models/Utente');
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
@@ -13,6 +14,7 @@ mongoose.connect(process.env.MONGODB_URI)
     await Segnaposto.deleteMany();
     await Quiz.deleteMany();
     await CacciaAlTesoro.deleteMany();
+    await Utente.deleteMany();
 
     console.log('Creazione quiz...');
 
@@ -49,6 +51,18 @@ mongoose.connect(process.env.MONGODB_URI)
       punti: 6
     });
 
+const quiz4= await Quiz.create({
+  domanda: "Qual è lo stile architettonico principale della Basilica di Santa Maria Maggiore a Trento?",
+  risposte: [
+    { testo: "Romanico", corretta: true },
+    { testo: "Barocco", corretta: false },
+    { testo: "Gotico", corretta: false },
+    { testo: "Rinascimentale", corretta: false }
+  ],
+  punti: 5
+});
+
+
     console.log('Creazione segnaposti...');
 
     const segnapostiCreati = await Segnaposto.create([
@@ -78,6 +92,17 @@ mongoose.connect(process.env.MONGODB_URI)
           { utenteId: "marta88", testo: "Perfetto per i bambini", voto: 5 }
         ],
         numeroVisitatori: 0
+      }, 
+      {
+        nome: "Basilica di Santa Maria Maggiore",
+        indirizzo: "Vicolo delle Orsoline, Trento",
+        descrizione: "La Basilica di Santa Maria Maggiore a Trento è uno degli edifici religiosi più importanti e antichi della città. Costruita tra il XVI e il XVII secolo in stile rinascimentale, si distingue per la sua facciata semplice ma elegante e per gli interni riccamente decorati, con affreschi e opere d'arte sacra. La basilica ha un ruolo centrale nella vita religiosa e culturale di Trento, essendo sede di numerosi eventi e celebrazioni storiche.",
+        coordinate: { lat: 46.0686, lng: 11.1194 },
+        punti: 15,
+        indizio: "",
+        quiz: [quiz4._id],
+        recensioni: [],
+        numeroVisitatori: 0
       }
     ]);
 
@@ -91,6 +116,30 @@ mongoose.connect(process.env.MONGODB_URI)
       ordine: index + 1 // Ordine crescente da 1 in poi
     }))
   });
+
+  console.log('Creazione utenti...');
+
+  await Utente.create({
+  username: "adminTrento",
+  email: "admin@admin",
+  password: "Admin1",
+  nome: "Mario",
+  cognome: "Rossi",
+  ruolo: "admin",
+  segnapostiSbloccati: []  // puoi mettere ObjectId di segnaposti se vuoi
+  },
+  {
+  username: "playerLuca",
+  email: "player@player",
+  password: "Player1",
+  nome: "Luca",
+  cognome: "Bianchi",
+  ruolo: "player",
+  segnapostiSbloccati: []
+});
+
+
+
 
     console.log('Dati inseriti con successo!');
     mongoose.disconnect();

@@ -12,6 +12,12 @@ require('dotenv').config();
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // si controlla che i campi email e password siano stati compilati
+        // se uno dei due è vuoto si risponde con un errore 400
+        if (!email || !password) {
+          return res.status(400).json({ message: "Email e password sono obbligatorie" });
+        }
         
         //presa la mail e password si cerca nel database l'utente con quella mail
         const utente = await UtenteSchema.findOne({ email });

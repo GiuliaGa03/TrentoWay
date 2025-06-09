@@ -65,7 +65,8 @@ describe('Login utente', () => {
         password: ''
       });
 
-    expect(res.status).toBe(400); // 
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/Password obbligatoria/i); 
   });
 
   test('Login con campo email vuoto', async () => {
@@ -77,9 +78,59 @@ describe('Login utente', () => {
       });
 
     expect(res.status).toBe(400);  
-    expect(res.body.message).toMatch(/Email e password sono obbligatorie/i);
+    expect(res.body.message).toMatch(/Email  obligatoria/i);
   });
 
 
+
+  test('Login con entrambi email e password vuoti', async () => {
+    const res = await request(app)
+      .post('/api/v1/autenticazione/login')
+      .send({
+        email: '',
+        password: ''
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/Email e password sono obbligatorie/i);
+  });
+
+  test('login bloccato dopo 5 tentativi falliti', async () => {
+    // Simulazione di 5 tentativi falliti
+    const email = `testblock${Date.now()}@example.com`;
+    // Creazione di un nuovo utente per il test
+    const password = 'Password123';
+    await request(app)
+      .post('/api/v1/autenticazione/registrazione')
+      .send({
+        email,
+        password,
+        confirmPassword: password,
+        username: 'utenteBloccato'
+      });
+
+    // Effettua 5 tentativi di login con password errata
+    for (let i = 0; i < 5; i++) {
+      await request(app)
+        .post('/api/v1/autenticazione/login')
+        .send({
+          email,
+          password: 'PasswordSbagliata'
+        });
+    }
+    // Il sesto tentativo dovrebbe fallire con un messaggio di blocco
+    const res = await request(app)
+      .post('/api/v1/autenticazione/login')
+      .send({
+        email,
+        password: 'PasswordCorretta'
+      });
+    expect(res.status).toBe(403);
+    expect(res.body.message).toMatch(/Troppi tentativi falliti, riprova più tardi/i);
+  });
+
+
+
+  
 });
 

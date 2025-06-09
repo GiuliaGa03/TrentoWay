@@ -25,11 +25,28 @@ router.post('/login', async (req, res) => {
             return res.status(404).json({ message: "Utente non trovato"});
         }
 
+        // se l'utente ha superato il numero massimo di tentativi di login falliti
+        if (utente.bloccaFinoAl && utente.bloccaFinoAl > new Date()) {
+          return res.status(403).json({ message: "Troppi tentativi falliti, riprova più tardi" });
+        }
+
         // se l'utente esiste si confronta la password inserita con quella salvata nel database
         const passwordValida = await bcrypt.compare(password, utente.password);
         if (!passwordValida) {
-            return res.status(401).json({ message: "Password errata" });
+
+          utente.tentativiFallitiLogin += 1; // incrementa il contatore dei tentativi falliti
+          if (utente.tentativiFallitiLogin >= 5) { // se sono stati fatti 5 tentativi falliti 
+            utente.bloccaFinoAl = new Date(Date.now() + 15 * 60 * 1000); // blocca l'utente per 15 minuti
+          }
+          await utente.save(); // salva le modifiche all'utente
+          // se la password non è corretta si risponde con un errore 401
+          return res.status(401).json({ message: "Password errata" });
         }
+
+        // se la password è corretta si resetta il contatore dei tentativi falliti e il blocco
+        utente.tentativiFallitiLogin = 0;
+        utente.bloccaFinoAl = null;
+        await utente.save(); // salva le modifiche all'utente
         
         // il token viene generato se la password è corretta
         const token = jwt.sign(

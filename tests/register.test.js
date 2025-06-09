@@ -1,7 +1,7 @@
 
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const Utente = require('../models/Utente');
+
 dotenv.config();
 
 // Connessione al database MongoDB prima di eseguire i test
@@ -10,10 +10,6 @@ beforeAll(async () => {
   await mongoose.connect(mongoURI);
 });
 
-// Pulizia del database prima di ogni test dai solo utenti di test
-beforeEach(async () => {
-  await Utente.deleteMany({ email: /testuser_/i });
-});
 
 const request = require('supertest');
 const app = require('../app');

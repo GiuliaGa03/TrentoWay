@@ -1,21 +1,48 @@
+
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const Utente = require('../models/Utente');
+dotenv.config();
+
+// Connessione al database MongoDB prima di eseguire i test
+beforeAll(async () => {
+  const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/test';
+  await mongoose.connect(mongoURI);
+});
+
+// Pulizia del database prima di ogni test dai solo utenti di test
+beforeEach(async () => {
+  await Utente.deleteMany({ email: /testuser_/i });
+});
+
 const request = require('supertest');
 const app = require('../app');
 
 let counter = 0;
 function getUniqueEmail() {
-  return `test${counter++}@example.com`;
+  //return `test${counter++}@example.com`;
+  return `testuser_${Date.now()}${Math.floor(Math.random() * 10000)}@example.com`;
 }
+function getUniqueUsername() {
+  //return `utente${Date.now()}${Math.floor(Math.random() * 10000)}`;
+  return 'user' + Math.random().toString(36).substring(2, 10);
+}
+
+jest.setTimeout(30000); // Imposta un timeout di 30 secondi per i test
 
 describe('Registrazione utente', () => {
   test('Registrazione con email valida', async () => {
+    const username = getUniqueUsername();
     const res = await request(app)
       .post('/api/v1/autenticazione/registrazione')
       .send({
         email: getUniqueEmail(),
         password: 'Password123',
         confirmPassword: 'Password123',
-        username: 'utenteValido'
+        username: username
       });
+
+    console.log('debug email valida:', res.body);
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
@@ -29,7 +56,7 @@ describe('Registrazione utente', () => {
         email: 'invalid-email',
         password: 'Password123',
         confirmPassword: 'Password123',
-        username: 'utenteErrore'
+        username: getUniqueUsername()
       });
 
     expect(res.status).toBe(400);
@@ -37,19 +64,18 @@ describe('Registrazione utente', () => {
 
   test('Email già registrata', async () => {
     const email = getUniqueEmail();
-
     await request(app).post('/api/v1/autenticazione/registrazione').send({
       email,
       password: 'Password123',
       confirmPassword: 'Password123',
-      username: 'utente1'
+      username: getUniqueUsername()
     });
 
     const res = await request(app).post('/api/v1/autenticazione/registrazione').send({
       email,
       password: 'Password456',
       confirmPassword: 'Password456',
-      username: 'utente2'
+      username: getUniqueUsername()
     });
 
     expect(res.status).toBe(400);
@@ -63,7 +89,7 @@ describe('Registrazione utente', () => {
         email: getUniqueEmail(),
         password: '',
         confirmPassword: '',
-        username: 'utenteErrore'
+        username: getUniqueUsername()
       });
 
     expect(res.status).toBe(400);
@@ -76,7 +102,7 @@ describe('Registrazione utente', () => {
         email: getUniqueEmail(),
         password: '123',
         confirmPassword: '123',
-        username: 'utenteErrore'
+        username: getUniqueUsername()
       });
 
     expect(res.status).toBe(400);
@@ -90,7 +116,7 @@ describe('Registrazione utente', () => {
         email: getUniqueEmail(),
         password: longPassword,
         confirmPassword: longPassword,
-        username: 'utenteErrore'
+        username: getUniqueUsername()
       });
 
     expect(res.status).toBe(400);
@@ -111,14 +137,14 @@ describe('Registrazione utente', () => {
       email: baseEmail.toLowerCase(),
       password: 'Password123',
       confirmPassword: 'Password123',
-      username: 'utente1'
+      username: getUniqueUsername()
     });
 
     const res = await request(app).post('/api/v1/autenticazione/registrazione').send({
       email: baseEmail.toUpperCase(),
       password: 'Password123',
       confirmPassword: 'Password123',
-      username: 'utente2'
+      username: getUniqueUsername()
     });
 
     // Il comportamento dipende da come il server gestisce le email duplicate case insensibili
@@ -139,5 +165,10 @@ describe('Registrazione utente', () => {
 
     expect(res.status).toBe(400);
   });
+});
+
+// Chiusura della connessione al database dopo i test
+afterAll(async () => {
+  await mongoose.connection.close();
 });
 

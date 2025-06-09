@@ -15,8 +15,16 @@ router.post('/login', async (req, res) => {
 
         // si controlla che i campi email e password siano stati compilati
         // se uno dei due è vuoto si risponde con un errore 400
-        if (!email || !password) {
-          return res.status(400).json({ message: "Email e password sono obbligatorie" });
+        if (!email && !password) {
+          return res.status(400).json({ message: "Email e password obbligatorie" });
+        }
+
+        if (!email) {
+          return res.status(400).json({ message: "Email obbligatoria" });
+        }
+        
+        if (!password) {
+          return res.status(400).json({ message: "Password obbligatoria" });
         }
         
         //presa la mail e password si cerca nel database l'utente con quella mail
@@ -90,6 +98,16 @@ router.post('/registrazione', async (req, res) => {
       return res.status(400).json({ message: 'Tutti i campi obbligatori devono essere compilati' });
     }
 
+    //email normalizzata in minuscolo per evitare problemi di case sensitivity
+    const emailNormalized = email.toLowerCase();
+
+    // si controlla che l'email abbia un formato valido
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailNormalized)) {
+      return res.status(400).json({ message: 'Email non valida' });
+    }
+
+
     // si controlla che lo username abbia lunghezza corretta e non contenga caratteri non validi
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (username.length < 3 || username.length > 20 || !usernameRegex.test(username)) {
@@ -115,7 +133,7 @@ router.post('/registrazione', async (req, res) => {
 
 
     // verifica utente esistente
-    const utenteEsistente = await Utente.findOne({ email });
+    const utenteEsistente = await Utente.findOne({ email: emailNormalized });
     if (utenteEsistente) {
       return res.status(400).json({ message: 'Utente già registrato' });
     }
@@ -124,11 +142,13 @@ router.post('/registrazione', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const nuovoUtente = new Utente({
       username,
-      email,
+      email: emailNormalized,
       password: hashedPassword,
       nome: firstName || '',
       cognome: lastName || '',
       ruolo: 'player', 
+      tentativiFallitiLogin: 0,
+      bloccaFinoAl: null,
     });
 
     await nuovoUtente.save();

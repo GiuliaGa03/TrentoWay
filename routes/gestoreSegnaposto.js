@@ -30,7 +30,7 @@ router.post('/', Auth('admin'), async (req, res) => {
   try {
     const nuovo = new Segnaposto(req.body); // quiz deve essere un array di ObjectId
     await nuovo.save();
-    res.status(201).json({ message: 'Segnaposto creato con successo'});
+    res.status(201).json({ message: 'Segnaposto creato con successo', id: nuovo._id });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

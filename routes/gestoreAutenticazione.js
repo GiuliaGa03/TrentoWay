@@ -12,6 +12,20 @@ require('dotenv').config();
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // si controlla che i campi email e password siano stati compilati
+        // se uno dei due è vuoto si risponde con un errore 400
+        if (!email && !password) {
+          return res.status(400).json({ message: "Email e password obbligatorie" });
+        }
+
+        if (!email) {
+          return res.status(400).json({ message: "Email obbligatoria" });
+        }
+        
+        if (!password) {
+          return res.status(400).json({ message: "Password obbligatoria" });
+        }
         
         //presa la mail e password si cerca nel database l'utente con quella mail
         const utente = await UtenteSchema.findOne({ email });
@@ -19,11 +33,28 @@ router.post('/login', async (req, res) => {
             return res.status(404).json({ message: "Utente non trovato"});
         }
 
+        // se l'utente ha superato il numero massimo di tentativi di login falliti
+        if (utente.bloccaFinoAl && utente.bloccaFinoAl > new Date()) {
+          return res.status(403).json({ message: "Troppi tentativi falliti, riprova più tardi" });
+        }
+
         // se l'utente esiste si confronta la password inserita con quella salvata nel database
         const passwordValida = await bcrypt.compare(password, utente.password);
         if (!passwordValida) {
-            return res.status(401).json({ message: "Password errata" });
+
+          utente.tentativiFallitiLogin += 1; // incrementa il contatore dei tentativi falliti
+          if (utente.tentativiFallitiLogin >= 5) { // se sono stati fatti 5 tentativi falliti 
+            utente.bloccaFinoAl = new Date(Date.now() + 15 * 60 * 1000); // blocca l'utente per 15 minuti
+          }
+          await utente.save(); // salva le modifiche all'utente
+          // se la password non è corretta si risponde con un errore 401
+          return res.status(401).json({ message: "Password errata" });
         }
+
+        // se la password è corretta si resetta il contatore dei tentativi falliti e il blocco
+        utente.tentativiFallitiLogin = 0;
+        utente.bloccaFinoAl = null;
+        await utente.save(); // salva le modifiche all'utente
         
         // il token viene generato se la password è corretta
         const token = jwt.sign(
@@ -67,6 +98,16 @@ router.post('/registrazione', async (req, res) => {
       return res.status(400).json({ message: 'Tutti i campi obbligatori devono essere compilati' });
     }
 
+    //email normalizzata in minuscolo per evitare problemi di case sensitivity
+    const emailNormalized = email.toLowerCase();
+
+    // si controlla che l'email abbia un formato valido
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailNormalized)) {
+      return res.status(400).json({ message: 'Email non valida' });
+    }
+
+
     // si controlla che lo username abbia lunghezza corretta e non contenga caratteri non validi
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (username.length < 3 || username.length > 20 || !usernameRegex.test(username)) {
@@ -92,7 +133,7 @@ router.post('/registrazione', async (req, res) => {
 
 
     // verifica utente esistente
-    const utenteEsistente = await Utente.findOne({ email });
+    const utenteEsistente = await Utente.findOne({ email: emailNormalized });
     if (utenteEsistente) {
       return res.status(400).json({ message: 'Utente già registrato' });
     }
@@ -101,11 +142,13 @@ router.post('/registrazione', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const nuovoUtente = new Utente({
       username,
-      email,
+      email: emailNormalized,
       password: hashedPassword,
       nome: firstName || '',
       cognome: lastName || '',
       ruolo: 'player', 
+      tentativiFallitiLogin: 0,
+      bloccaFinoAl: null,
     });
 
     await nuovoUtente.save();

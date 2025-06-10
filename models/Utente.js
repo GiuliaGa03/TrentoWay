@@ -8,6 +8,8 @@ const utenteSchema = new mongoose.Schema({
   cognome:  { type: String },
   ruolo:    { type: String, default: 'player' },
   segnapostiSbloccati: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Segnaposto', default: [] }],
+  tentativiFallitiLogin: { type: Number, default: 0 },
+  bloccaFinoAl: { type: Date, default: null },
 });
 
 module.exports = mongoose.model('Utente', utenteSchema);
